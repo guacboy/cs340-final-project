@@ -1,81 +1,86 @@
-SET FOREIGN_KEY_CHECKS=0;
+SET FOREIGN_KEY_CHECKS = 0;
 SET AUTOCOMMIT = 0;
 
 -- products
-INSERT INTO Products(
+INSERT INTO Products (
     name,
     price
 )
-VALUES (
-    (
-        "Classic",
-        5.00
-    ),
-    (
-        "Strawberry",
-        7.25
-    ),
-    (
-        "Watermelon",
-        7.25
-    )
-)
+VALUES
+("Classic", 5.00),
+("Strawberry", 7.25),
+("Watermelon", 7.25);
 
 -- ingredients
-INSERT INTO Ingredients(
+INSERT INTO Ingredients (
     name,
     unit,
     costPerUnit,
-    stock
+    stock,
+    supplierID
 )
-VALUES (
-    (
-        "Lemons",
-        10,
-        7.25,
-        25
-    ),
-    (
-        "Sugar",
-        10,
-        9.75,
-        25
-    ),
-    (
-        "Water",
-        10,
-        5.00,
-        25
-    ),
-    (
-        "Strawberries",
-        5,
-        10.50,
-        15
-    ),
-    (
-        "Watermelons",
-        5,
-        10.50,
-        15
-    )
-)
+VALUES
+(
+    "Lemons",
+    "pieces",
+    7.25,
+    2500,
+    1
+),
+(
+    "Sugar",
+    "grams",
+    9.75,
+    2500,
+    1
+),
+(
+    "Water",
+    "ml",
+    5.00,
+    2500,
+    1
+),
+(
+    "Strawberries",
+    "pieces",
+    10.50,
+    1500,
+    2
+),
+(
+    "Watermelons",
+    "pieces",
+    10.50,
+    1500,
+    3
+);
 
 -- product_ingredients
-INSERT INTO Product_Ingredients(
-
+INSERT INTO Product_Ingredients (
+    productID,
+    ingredientID, 
+    unitQuantityRequired
 )
-VALUES (
-    
-)
+VALUES
+    (1, 1, 10),
+    (1, 2, 10),
+    (1, 3, 10),
+    (2, 1, 5),
+    (2, 2, 10),
+    (2, 3, 10),
+    (2, 4, 5),
+    (3, 2, 10),
+    (3, 3, 10),
+    (3, 5, 10);
 
 -- suppliers
-INSERT INTO Suppliers(
+INSERT INTO Suppliers (
     name,
-    phone,
+    phone, 
     email
 )
-VALUES (
+VALUES
     (
         "Wario's Warehouse",
         "1-800-555-1111",
@@ -90,52 +95,29 @@ VALUES (
         "Garry's Garden",
         "1-800-555-3333",
         "garry.garden@yahoo.com"
-    )
-)
+    );
 
 -- sales
-INSERT INTO Sales(
+INSERT INTO Sales (
     saleDate
 )
-VALUES (
-    (
-        "2025-06-20"
-    ),
-    (
-        "2025-06-24"
-    ),
-    (
-        "2025-06-27"
-    )
-)
+VALUES
+    ("2025-06-20"),
+    ("2025-06-24"),
+    ("2025-06-27");
 
 -- sale_details
-INSERT INTO Sale_Details(
+INSERT INTO Sale_Details (
     saleID,
     productID,
     quantity,
     salePrice
 )
-VALUES (
-    (
-        1,
-        1,
-        4,
-        20.00
-    ),
-    (
-        2,
-        2,
-        2,
-        14.50
-    ),
-    (
-        3,
-        3,
-        2,
-        14.50
-    )
-)
+VALUES
+    (1, 1, 4, 5.00),
+    (2, 1, 1, 5.00),
+    (2, 2, 2, 7.25),
+    (3, 3, 2, 725);
 
-SET FOREIGN_KEY_CHECKS=1;
+SET FOREIGN_KEY_CHECKS = 1;
 COMMIT;
