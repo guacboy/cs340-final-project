@@ -1,7 +1,7 @@
 SET FOREIGN_KEY_CHECKS = 0;
 SET AUTOCOMMIT = 0;
 
--- products
+-- Table creation for Products
 CREATE OR REPLACE TABLE Products (
     productID INT AUTO_INCREMENT UNIQUE NOT NULL,
     name VARCHAR(150) NOT NULL,
@@ -9,7 +9,7 @@ CREATE OR REPLACE TABLE Products (
     PRIMARY KEY (productID)
 );
 
--- suppliers
+-- Table creation for Suppliers
 CREATE OR REPLACE TABLE Suppliers (
     supplierID INT AUTO_INCREMENT UNIQUE NOT NULL,
     name VARCHAR(150) NOT NULL,
@@ -18,7 +18,7 @@ CREATE OR REPLACE TABLE Suppliers (
     PRIMARY KEY (supplierID)
 );
 
--- ingredients
+-- Table creation for Ingredients
 CREATE OR REPLACE TABLE Ingredients (
     ingredientID INT AUTO_INCREMENT UNIQUE NOT NULL,
     name VARCHAR(150) NOT NULL UNIQUE,
@@ -30,7 +30,7 @@ CREATE OR REPLACE TABLE Ingredients (
     FOREIGN KEY (supplierID) REFERENCES Suppliers(supplierID)
 );
 
--- product_ingredients
+-- Table creation for Product_Ingredients
 CREATE OR REPLACE TABLE Product_Ingredients (
     productID INT NOT NULL,
     ingredientID INT NOT NULL,
@@ -39,14 +39,14 @@ CREATE OR REPLACE TABLE Product_Ingredients (
     FOREIGN KEY (ingredientID) REFERENCES Ingredients (ingredientID)
 );
 
--- sales
+-- Table creation for Sales
 CREATE OR REPLACE TABLE Sales (
     saleID INT AUTO_INCREMENT UNIQUE NOT NULL,
     saleDate TIMESTAMP NOT NULL,
     PRIMARY KEY (saleID)
 );
 
--- sale_details
+-- Table creation for Sale_Details
 CREATE OR REPLACE TABLE Sale_Details (
     saleID INT NOT NULL,
     productID INT NOT NULL,

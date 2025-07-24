@@ -1,7 +1,7 @@
 SET FOREIGN_KEY_CHECKS = 0;
 SET AUTOCOMMIT = 0;
 
--- products
+-- Data insertion for Products
 INSERT INTO Products (
     name,
     price
@@ -11,7 +11,7 @@ VALUES
 ("Strawberry", 7.25),
 ("Watermelon", 7.25);
 
--- ingredients
+-- Data insertion for Ingredients
 INSERT INTO Ingredients (
     name,
     unit,
@@ -56,7 +56,7 @@ VALUES
     3
 );
 
--- product_ingredients
+-- Data insertion for Product_Ingredients
 INSERT INTO Product_Ingredients (
     productID,
     ingredientID, 
@@ -74,7 +74,7 @@ VALUES
     (3, 3, 10),
     (3, 5, 10);
 
--- suppliers
+-- Data insertion for Suppliers
 INSERT INTO Suppliers (
     name,
     phone, 
@@ -97,7 +97,7 @@ VALUES
         "garry.garden@yahoo.com"
     );
 
--- sales
+-- Data insertion for Sales
 INSERT INTO Sales (
     saleDate
 )
@@ -106,7 +106,7 @@ VALUES
     ("2025-06-24"),
     ("2025-06-27");
 
--- sale_details
+-- Data insertion for Sale_Details
 INSERT INTO Sale_Details (
     saleID,
     productID,
