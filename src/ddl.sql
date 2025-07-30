@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS Sales;
 DROP TABLE IF EXISTS Sale_Details;
 
 -- Table creation for Products
+-- Products offered for sale to customers (including three flavors: Classic, Strawberry, and Watermelon)
 CREATE TABLE Products (
     productID INT AUTO_INCREMENT UNIQUE NOT NULL,
     name VARCHAR(150) NOT NULL,
@@ -17,16 +18,8 @@ CREATE TABLE Products (
     PRIMARY KEY (productID)
 );
 
--- Table creation for Suppliers
-CREATE TABLE Suppliers (
-    supplierID INT AUTO_INCREMENT UNIQUE NOT NULL,
-    name VARCHAR(150) NOT NULL,
-    phone VARCHAR(14),
-    email VARCHAR(150),
-    PRIMARY KEY (supplierID)
-);
-
 -- Table creation for Ingredients
+-- Raw materials that are used to create the products (including lemons, sugar, water, strawberries, and watermelon)
 CREATE TABLE Ingredients (
     ingredientID INT AUTO_INCREMENT UNIQUE NOT NULL,
     name VARCHAR(150) NOT NULL UNIQUE,
@@ -41,6 +34,7 @@ CREATE TABLE Ingredients (
 );
 
 -- Table creation for Product_Ingredients
+-- Intersection table for product-ingredients recipe mapping (M:M)
 CREATE TABLE Product_Ingredients (
     productID INT NOT NULL,
     ingredientID INT NOT NULL,
@@ -53,7 +47,18 @@ CREATE TABLE Product_Ingredients (
         ON UPDATE CASCADE  -- Update if ingredientID changes
 );
 
+-- Table creation for Suppliers
+-- Local vendors provide their respective raw ingredients to produce the product
+CREATE TABLE Suppliers (
+    supplierID INT AUTO_INCREMENT UNIQUE NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    phone VARCHAR(14),
+    email VARCHAR(150),
+    PRIMARY KEY (supplierID)
+);
+
 -- Table creation for Sales
+-- Records of lemonade sale transactions
 CREATE TABLE Sales (
     saleID INT AUTO_INCREMENT UNIQUE NOT NULL,
     saleDate TIMESTAMP NOT NULL,
@@ -61,6 +66,7 @@ CREATE TABLE Sales (
 );
 
 -- Table creation for Sale_Details
+-- Intersection table for sales-products mapping (M:M)
 CREATE TABLE Sale_Details (
     saleID INT NOT NULL,
     productID INT NOT NULL,
@@ -79,12 +85,6 @@ INSERT INTO Products (name, price) VALUES
 ("Classic", 5.00),
 ("Strawberry", 7.25),
 ("Watermelon", 7.25);
-
--- Data insertion for Suppliers
-INSERT INTO Suppliers (name, phone, email) VALUES
-("Wario's Warehouse", "1-800-555-1111", "wario.warehouse@gmail.com"),
-("Stan's Store", "1-800-555-2222", "stan.store@hotmail.com"),
-("Garry's Garden", "1-800-555-3333", "garry.garden@yahoo.com");
 
 -- Data insertion for Ingredients
 INSERT INTO Ingredients (name, unit, costPerUnit, stock, supplierID) VALUES
@@ -106,6 +106,12 @@ INSERT INTO Product_Ingredients (productID, ingredientID, unitQuantityRequired) 
 (3, 2, 10),
 (3, 3, 10),
 (3, 5, 10);
+
+-- Data insertion for Suppliers
+INSERT INTO Suppliers (name, phone, email) VALUES
+("Wario's Warehouse", "1-800-555-1111", "wario.warehouse@gmail.com"),
+("Stan's Store", "1-800-555-2222", "stan.store@hotmail.com"),
+("Garry's Garden", "1-800-555-3333", "garry.garden@yahoo.com");
 
 -- Data insertion for Sales
 INSERT INTO Sales (saleDate) VALUES
