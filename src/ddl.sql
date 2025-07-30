@@ -9,6 +9,10 @@ DROP TABLE IF EXISTS Product_Ingredients;
 DROP TABLE IF EXISTS Sales;
 DROP TABLE IF EXISTS Sale_Details;
 
+-- ===========================================================================
+-- TABLE CREATION
+-- ===========================================================================
+
 -- Table creation for Products
 -- Products offered for sale to customers (including three flavors: Classic, Strawberry, and Watermelon)
 CREATE TABLE Products (
@@ -79,6 +83,10 @@ CREATE TABLE Sale_Details (
         ON DELETE RESTRICT  -- Prevent product deletion if sales exist
         ON UPDATE CASCADE   -- Update if productID changes
 );
+
+-- ===========================================================================
+-- DATA INSERTION
+-- ===========================================================================
 
 -- Data insertion for Products
 INSERT INTO Products (name, price) VALUES
