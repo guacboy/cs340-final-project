@@ -11,7 +11,12 @@ const suppliers = ref([
     phone: "1-800-555-1111",
     email: "wario.warehouse@gmail.com",
   },
-  { supplierID: 2, name: "Stan's Store", phone: "1-800-555-2222", email: "stan.store@hotmail.com" },
+  {
+    supplierID: 2,
+    name: "Stan's Store",
+    phone: "1-800-555-2222",
+    email: "stan.store@hotmail.com",
+  },
   {
     supplierID: 3,
     name: "Garry's Garden",
