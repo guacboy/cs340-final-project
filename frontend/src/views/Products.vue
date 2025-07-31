@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from "vue";
 import BackButton from "../components/Button.vue";
+import InlineEditableRow from "../components/InlineEditableRow.vue";
 import { Pencil, X, Plus } from "lucide-vue-next";
 
 // Sample data
@@ -46,6 +47,8 @@ const products = ref([
   },
 ]);
 
+
+// Form Modal
 const isModalOpen = ref(false);
 const selected = ref("");
 const newProduct = ref({
@@ -53,6 +56,19 @@ const newProduct = ref({
   price: 0,
   ingredients: [],
 });
+
+function onAdd() {
+  isModalOpen.value = true;
+}
+
+function closeModal() {
+  isModalOpen.value = false;
+  newProduct.value = {
+    name: "",
+    price: 0,
+    ingredients: [{ ingredientID: "", name: "", unitQuantityRequired: 0 }],
+  };
+}
 
 function newProductAddIngredient() {
   newProduct.value.ingredients.push({
@@ -71,15 +87,8 @@ function submitNewProduct() {
   closeModal();
 }
 
-function closeModal() {
-  isModalOpen.value = false;
-  newProduct.value = {
-    name: "",
-    price: 0,
-    ingredients: [{ ingredientID: "", name: "", unitQuantityRequired: 0 }],
-  };
-}
 
+// Table dropdown expansion
 const expanded = ref(new Set());
 function toggleExpand(id) {
   if (expanded.value.has(id)) {
@@ -89,17 +98,30 @@ function toggleExpand(id) {
   }
 }
 
-function onAdd() {
-  isModalOpen.value = true;
-}
-function onEdit(id) {
-  console.log("Edit Product ID:", id);
-  alert("Editing Product ID: " + id);
-}
 function onRemove(id) {
   console.log("Remove Product ID:", id);
   alert("Deleting Product ID: " + id);
 }
+
+// Edit Table Row
+const editingID = ref(null);
+
+function startEdit(id) {
+  editingID.value = id;
+}
+
+function cancelEdit() {
+  editingID.value = null;
+}
+
+function saveEdit(id, update) {
+  const index = products.value.findIndex(p => p.productID === id);
+  if (index !== -1) {
+    products.value[index] = { ...products.value[index], ...update };
+  }
+  cancelEdit();
+}
+
 </script>
 
 <template>
@@ -126,13 +148,45 @@ function onRemove(id) {
       </thead>
       <tbody class="divide-y divide-(--grey)">
         <template v-for="p in products" :key="p.productID">
+
+          <template v-if="editingID === p.productID">
+            <InlineEditableRow
+              :value="p"
+              :onSave="update => saveEdit(p.productID, update)"
+              :onCancel="cancelEdit"
+            >
+
+            <template #cols="{ row }">
+              <td class="px-4 py-2 text-left">{{ row.productID }}</td>
+              <td class="px-4 py-2 align-middle overflow-hidden">
+                <input
+                  v-model="row.name"
+                  type="text"
+                  class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
+                />
+              </td>
+              <td class="px-4 py-2 align-middle overflow-hidden">
+                <input
+                  v-model.number="row.price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
+                />
+              </td>
+            </template>
+
+            </InlineEditableRow>
+          </template>
+
+          <template v-else>
           <tr @click="toggleExpand(p.productID)" class="cursor-pointer hover:bg-(--base)">
             <td class="px-4 py-2 text-left">{{ p.productID }}</td>
             <td class="px-4 py-2 text-left">{{ p.name }}</td>
             <td class="px-4 py-2 text-left">{{ p.price.toFixed(2) }}</td>
             <td class="px-4 py-2 text-right space-x-2">
               <button
-                @click.stop="onEdit(p.productID)"
+                @click.stop="startEdit(p.productID)"
                 class="cursor-pointer px-1 py-1 bg-(--secondary) text-black rounded-sm hover:bg-(--secondary-light) transition"
               >
                 <Pencil />
@@ -145,6 +199,7 @@ function onRemove(id) {
               </button>
             </td>
           </tr>
+          </template>
 
           <tr v-if="expanded.has(p.productID)">
             <td colspan="4" class="bg-(--elevated) p-1">
@@ -167,6 +222,8 @@ function onRemove(id) {
             </td>
           </tr>
         </template>
+
+
       </tbody>
     </table>
   </div>
@@ -181,7 +238,7 @@ function onRemove(id) {
       >
         <div class="absolute top-2 right-2">
           <button
-            @click="closeModal()"
+            @click="closeModal"
             type="button"
             class="cursor-pointer text-(--grey) hover:text-(--primary) transition"
           >
@@ -251,7 +308,7 @@ function onRemove(id) {
         <div class="w-full flex justify-end mb-6">
           <button
             type="button"
-            @click="newProductAddIngredient()"
+            @click="newProductAddIngredient"
             class="cursor-pointer flex hover:bg-(--base) rounded-sm transition"
           >
             <Plus /> Add Ingredient
