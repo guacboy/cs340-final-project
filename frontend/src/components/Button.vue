@@ -1,10 +1,18 @@
+<script setup>
+import { ArrowBigLeft } from 'lucide-vue-next'
+</script>
+
+
 <template>
   <div class="flex min-w-xl">
     <RouterLink 
       to="/"
-      class="block p-2 text-center bg-white rounded-md shadow hover:shadow-md transition"
+      class="flex space-x-2 p-2 text-center bg-(--surface) rounded-sm shadow hover:bg-(--elevated) hover:shadow-md transition"
     >
-      <span class="text-md text-black font-semibold">Back</span>
+      <ArrowBigLeft />
+      <span class="text-(--white)">
+        Back
+      </span>
     </RouterLink>
   </div>
 </template>

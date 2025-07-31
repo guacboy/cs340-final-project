@@ -3,9 +3,9 @@ import { ref } from 'vue'
 
 const sections = ref([
   { name: 'products',    label: 'Products',    path: '/products' },
-  { name: 'suppliers',   label: 'Suppliers',   path: '/suppliers' },
-  { name: 'ingredients', label: 'Ingredients', path: '/ingredients' },
   { name: 'sales',       label: 'Sales',       path: '/sales' },
+  { name: 'ingredients', label: 'Ingredients', path: '/ingredients' },
+  { name: 'suppliers',   label: 'Suppliers',   path: '/suppliers' },
 ])
 </script>
 
