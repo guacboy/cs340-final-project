@@ -1,3 +1,10 @@
+-- ===========================================================================
+-- DDL including table creation and data insertion.
+-- ===========================================================================
+
+-- Dylan Nguyen
+-- Ryan Davidson
+
 SET FOREIGN_KEY_CHECKS = 0;
 SET AUTOCOMMIT = 0;
 
@@ -40,9 +47,11 @@ CREATE TABLE Ingredients (
 -- Table creation for Product_Ingredients
 -- Intersection table for product-ingredients recipe mapping (M:M)
 CREATE TABLE Product_Ingredients (
+    recipeID INT AUTO_INCREMENT UNIQUE NOT NULL,
     productID INT NOT NULL,
     ingredientID INT NOT NULL,
     unitQuantityRequired INT UNSIGNED NOT NULL,
+    PRIMARY KEY (recipeID)
     FOREIGN KEY (productID) REFERENCES Products (productID)
         ON DELETE CASCADE  -- Delete recipe if product is deleted
         ON UPDATE CASCADE, -- Update if productID changes
@@ -72,10 +81,12 @@ CREATE TABLE Sales (
 -- Table creation for Sale_Details
 -- Intersection table for sales-products mapping (M:M)
 CREATE TABLE Sale_Details (
+    saleDetailsID INT AUTO_INCREMENT UNIQUE NOT NULL,
     saleID INT NOT NULL,
     productID INT NOT NULL,
     quantity INT NOT NULL,
     salePrice DECIMAL(10, 2) NOT NULL,
+    PRIMARY KEY (saleDetailsID)
     FOREIGN KEY (saleID) REFERENCES Sales (saleID)
         ON DELETE CASCADE  -- Delete details if sale is deleted
         ON UPDATE CASCADE, -- Update if saleID changes

@@ -1,5 +1,12 @@
 -- ===========================================================================
--- CRUD FOR PRODUCTS TABLE
+-- DML including CRUD operations for all entities.
+-- ===========================================================================
+
+-- Dylan Nguyen
+-- Ryan Davidson
+
+-- ===========================================================================
+-- CRUD OPERATIONS FOR PRODUCTS TABLE
 -- ===========================================================================
 
 -- CREATE
@@ -20,7 +27,7 @@ DELETE FROM Products
 WHERE productID = @productIDInput;
 
 -- ===========================================================================
--- CRUD FOR INGREDIENTS TABLE
+-- CRUD OPERATIONS FOR INGREDIENTS TABLE
 -- ===========================================================================
 
 -- CREATE
@@ -41,7 +48,7 @@ SET name = @nameInput,
 WHERE ingredientID = @ingredientIDInput;
 
 -- ===========================================================================
--- CRUD FOR PRODUCT_INGREDIENTS TABLE
+-- CRUD OPERATIONS FOR PRODUCT_INGREDIENTS TABLE
 -- ===========================================================================
 
 -- CREATE
@@ -62,7 +69,7 @@ DELETE FROM Product_Ingredients
 WHERE productID = @productIDInput AND ingredientID = @ingredientIDInput;
 
 -- ===========================================================================
--- CRUD FOR SUPPLIERS TABLE
+-- CRUD OPERATIONS FOR SUPPLIERS TABLE
 -- ===========================================================================
 
 -- CREATE
@@ -83,7 +90,7 @@ DELETE FROM Suppliers
 WHERE supplierID = @supplierIDInput;
 
 -- ===========================================================================
--- CRUD FOR SALES TABLE
+-- CRUD OPERATIONS FOR SALES TABLE
 -- ===========================================================================
 
 -- CREATE (+ return new ID)
@@ -104,7 +111,7 @@ DELETE FROM Sales
 WHERE saleID = @saleIDInput;
 
 -- ===========================================================================
--- CRUD FOR SALE_DETAILS TABLE
+-- CRUD OPERATIONS FOR SALE_DETAILS TABLE
 -- ===========================================================================
 
 -- CREATE
