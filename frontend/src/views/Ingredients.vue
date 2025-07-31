@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import InlineEditableRow from "../components/InlineEditableRow.vue";
 import BackButton from "../components/Button.vue";
 import { Pencil, X, Plus } from "lucide-vue-next";
 
@@ -83,6 +84,10 @@ function submitNewIngredient() {
   closeModal();
 }
 
+function onAdd() {
+  isModalOpen.value = true;
+}
+
 function closeModal() {
   isModalOpen.value = false;
   newIngredient.value = {
@@ -94,13 +99,23 @@ function closeModal() {
   };
 }
 
-function onAdd() {
-  isModalOpen.value = true;
+// Edit Table Row
+const editingID = ref(null);
+
+function startEdit(id) {
+  editingID.value = id;
 }
 
-function onEdit(id) {
-  console.log("Edit Ingredient ID:", id);
-  alert("Editing Ingredient ID: " + id);
+function cancelEdit() {
+  editingID.value = null;
+}
+
+function saveEdit(id, update) {
+  const index = ingredients.value.findIndex(i => i.ingredientID === id);
+  if (index !== -1) {
+    ingredients.value[index] = { ...ingredients.value[index], ...update };
+  }
+  cancelEdit();
 }
 
 function onRemove(id) {
@@ -123,6 +138,15 @@ function onRemove(id) {
 
   <div class="overflow-auto bg-(--surface) border border-(--grey) rounded-md shadow-md">
     <table class="min-w-full divide-y">
+      <colgroup v-if="editingID != null">
+        <col class="w-1/13" />
+        <col class="w-2/13" />
+        <col class="w-2/13" />
+        <col class="w-2/13" />
+        <col class="w-2/13" />
+        <col class="w-2/13" />
+        <col class="w-2/13" />
+      </colgroup>
       <thead class="bg-(--base)">
         <tr>
           <th class="px-4 py-2 text-left">ID</th>
@@ -136,28 +160,84 @@ function onRemove(id) {
       </thead>
       <tbody class="divide-y divide-(--grey)">
         <template v-for="i in ingredients" :key="i.ingredientID">
-          <tr class="hover:bg-(--base)">
-            <td class="px-4 py-2 text-left">{{ i.ingredientID }}</td>
-            <td class="px-4 py-2 text-left">{{ i.name }}</td>
-            <td class="px-4 py-2">{{ i.unit }}</td>
-            <td class="px-4 py-2">{{ i.costPerUnit.toFixed(2) }}</td>
-            <td class="px-4 py-2 text-left">{{ i.stock }}</td>
-            <td class="px-4 py-2">{{ i.supplierID }}</td>
-            <td class="px-4 py-2 text-right space-x-2">
-              <button
-                @click.stop="onEdit(i.ingredientID)"
-                class="cursor-pointer px-1 py-1 bg-(--secondary) text-black rounded-sm hover:bg-(--secondary-light) transition"
-              >
-                <Pencil />
-              </button>
-              <button
-                @click.stop="onRemove(i.ingredientID)"
-                class="cursor-pointer px-1 py-1 bg-(--primary) text-black rounded-sm hover:bg-(--primary-light) transition"
-              >
-                <X />
-              </button>
-            </td>
-          </tr>
+
+          <template v-if="editingID === i.ingredientID">
+            <InlineEditableRow
+              :value="i"
+              :onSave="update => saveEdit(i.ingredientID, update)"
+              :onCancel="cancelEdit"
+            >
+              <template #cols="{ row }">
+                <td class="px-4 py-2 text-left">{{ row.ingredientID }}</td>
+                <td class="px-1">
+                  <input
+                    v-model="row.name"
+                    type="text"
+                    class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
+                  />
+                </td>
+                <td class="px-1">
+                  <input
+                    v-model="row.unit"
+                    type="text"
+                    class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
+                  />
+                </td>
+                <td class="px-1">
+                  <input
+                    v-model.number="row.costPerUnit"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
+                  />
+                </td>
+                <td class="px-1">
+                  <input
+                    v-model.number="row.stock"
+                    type="number"
+                    min="0"
+                    step="1"
+                    class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
+                  />
+                </td>
+                <td class="px-1">
+                  <input
+                    v-model.number="row.supplierID"
+                    type="number"
+                    min="0"
+                    step="1"
+                    class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
+                  />
+                </td>
+              </template>
+            </InlineEditableRow>
+          </template>
+
+          <template v-else>
+            <tr class="hover:bg-(--base)">
+              <td class="px-4 py-2 text-left">{{ i.ingredientID }}</td>
+              <td class="px-4 py-2 text-left">{{ i.name }}</td>
+              <td class="px-4 py-2">{{ i.unit }}</td>
+              <td class="px-4 py-2">{{ i.costPerUnit.toFixed(2) }}</td>
+              <td class="px-4 py-2 text-left">{{ i.stock }}</td>
+              <td class="px-4 py-2">{{ i.supplierID }}</td>
+              <td class="px-4 py-2 text-right space-x-2">
+                <button
+                  @click.stop="startEdit(i.ingredientID)"
+                  class="cursor-pointer px-1 py-1 bg-(--secondary) text-black rounded-sm hover:bg-(--secondary-light) transition"
+                >
+                  <Pencil />
+                </button>
+                <button
+                  @click.stop="onRemove(i.ingredientID)"
+                  class="cursor-pointer px-1 py-1 bg-(--primary) text-black rounded-sm hover:bg-(--primary-light) transition"
+                >
+                  <X />
+                </button>
+              </td>
+            </tr>
+          </template>
         </template>
       </tbody>
     </table>

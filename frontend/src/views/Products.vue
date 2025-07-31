@@ -158,14 +158,14 @@ function saveEdit(id, update) {
 
             <template #cols="{ row }">
               <td class="px-4 py-2 text-left">{{ row.productID }}</td>
-              <td class="px-4 py-2 align-middle overflow-hidden">
+              <td class="px-1">
                 <input
                   v-model="row.name"
                   type="text"
                   class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
                 />
               </td>
-              <td class="px-4 py-2 align-middle overflow-hidden">
+              <td class="px-1">
                 <input
                   v-model.number="row.price"
                   type="number"

@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import InlineEditableRow from "../components/InlineEditableRow.vue";
 import BackButton from "../components/Button.vue";
 import { Pencil, X, Plus } from "lucide-vue-next";
 
@@ -38,6 +39,10 @@ function submitNewSupplier() {
   closeModal();
 }
 
+function onAdd() {
+  isModalOpen.value = true;
+}
+
 function closeModal() {
   isModalOpen.value = false;
   newSupplier.value = {
@@ -47,13 +52,23 @@ function closeModal() {
   };
 }
 
-function onAdd() {
-  isModalOpen.value = true;
+// Edit Table Row
+const editingID = ref(null);
+
+function startEdit(id) {
+  editingID.value = id;
 }
 
-function onEdit(id) {
-  console.log("Edit Supplier ID:", id);
-  alert("Editing Supplier ID: " + id);
+function cancelEdit() {
+  editingID.value = null;
+}
+
+function saveEdit(id, update) {
+  const index = suppliers.value.findIndex(s => s.supplierID === id);
+  if (index !== -1) {
+    suppliers.value[index] = { ...suppliers.value[index], ...update };
+  }
+  cancelEdit();
 }
 
 function onRemove(id) {
@@ -87,26 +102,62 @@ function onRemove(id) {
       </thead>
       <tbody class="divide-y divide-(--grey)">
         <template v-for="s in suppliers" :key="s.supplierID">
-          <tr class="cursor-pointer hover:bg-(--base)">
-            <td class="px-4 py-2 text-left">{{ s.supplierID }}</td>
-            <td class="px-4 py-2 text-left">{{ s.name }}</td>
-            <td class="px-4 py-2 text-left">{{ s.phone }}</td>
-            <td class="px-4 py-2 text-left">{{ s.email }}</td>
-            <td class="px-4 py-2 text-right space-x-2">
-              <button
-                @click.stop="onEdit(s.supplierID)"
-                class="cursor-pointer px-1 py-1 bg-(--secondary) text-black rounded-sm hover:bg-(--secondary-light) transition"
-              >
-                <Pencil />
-              </button>
-              <button
-                @click.stop="onRemove(s.supplierID)"
-                class="cursor-pointer px-1 py-1 bg-(--primary) text-black rounded-sm hover:bg-(--primary-light) transition"
-              >
-                <X />
-              </button>
-            </td>
-          </tr>
+
+          <template v-if="editingID === s.supplierID">
+            <InlineEditableRow
+              :value="s"
+              :onSave="update => saveEdit(s.supplierID, update)"
+              :onCancel="cancelEdit"
+            >
+              <template #cols="{ row }">
+                <td class="px-4 py-2 text-left">{{ row.supplierID }}</td>
+                <td class="px-1">
+                  <input
+                    v-model="row.name"
+                    type="text"
+                    class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
+                  />
+                </td>
+                <td class="px-1">
+                  <input
+                    v-model="row.phone"
+                    type="text"
+                    class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
+                  />
+                </td>
+                <td class="px-1">
+                  <input
+                    v-model="row.email"
+                    type="text"
+                    class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
+                  />
+                </td>
+              </template>
+            </InlineEditableRow>
+          </template>
+
+          <template v-else>
+            <tr class="cursor-pointer hover:bg-(--base)">
+              <td class="px-4 py-2 text-left">{{ s.supplierID }}</td>
+              <td class="px-4 py-2 text-left">{{ s.name }}</td>
+              <td class="px-4 py-2 text-left">{{ s.phone }}</td>
+              <td class="px-4 py-2 text-left">{{ s.email }}</td>
+              <td class="px-4 py-2 text-right space-x-2">
+                <button
+                  @click.stop="startEdit(s.supplierID)"
+                  class="cursor-pointer px-1 py-1 bg-(--secondary) text-black rounded-sm hover:bg-(--secondary-light) transition"
+                >
+                  <Pencil />
+                </button>
+                <button
+                  @click.stop="onRemove(s.supplierID)"
+                  class="cursor-pointer px-1 py-1 bg-(--primary) text-black rounded-sm hover:bg-(--primary-light) transition"
+                >
+                  <X />
+                </button>
+              </td>
+            </tr>
+          </template>
         </template>
       </tbody>
     </table>
