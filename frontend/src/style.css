@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@theme {
+  --base: #212528;
+  --surface: #272b2e;
+  --elevated: #2a2e31;
+  --white: #fffaff;
+  --grey: #a4a9ac;
+  --success: #00a896;
+  --success-light: #00e3cb;
+  --primary: #fe413d;
+  --primary-light: #f84c48;
+  --secondary: #fdbc2c;
+  --secondary-light: #ffd986;
+}
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  text-decoration: inherit;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: all 0.3s ease-out;
+  overflow: hidden;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-10px);
+  height: 0;
+}
+
+.slide-fade-enter-to,
+.slide-fade-leave-from {
+  transform: translateY(0);
+  height: auto;
+}
