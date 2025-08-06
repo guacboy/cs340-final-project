@@ -1,7 +1,7 @@
 SET FOREIGN_KEY_CHECKS = 0;
 SET AUTOCOMMIT = 0;
 
--- Drops any previously created tables
+-- Drop tables in reverse dependency order
 DROP TABLE IF EXISTS Sale_Details;
 DROP TABLE IF EXISTS Sales;
 DROP TABLE IF EXISTS Product_Ingredients;
@@ -12,7 +12,7 @@ DROP TABLE IF EXISTS Suppliers;
 -- ===========================================================================
 -- TABLE CREATION
 -- ===========================================================================
--- Suppliers
+-- Suppliers (independent)
 CREATE TABLE Suppliers (
     supplierID INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(150) NOT NULL UNIQUE,
@@ -20,7 +20,7 @@ CREATE TABLE Suppliers (
     email VARCHAR(150)
 );
 
--- Ingredients
+-- Ingredients (independent)
 CREATE TABLE Ingredients (
     ingredientID INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(150) NOT NULL UNIQUE,
@@ -42,17 +42,16 @@ CREATE TABLE Products (
 
 -- Product_Ingredients (M:M bridge)
 CREATE TABLE Product_Ingredients (
-    recipeID INT AUTO_INCREMENT UNIQUE NOT NULL,
+    recipeID INT AUTO_INCREMENT PRIMARY KEY,
     productID INT NOT NULL,
     ingredientID INT NOT NULL,
     unitQuantityRequired INT UNSIGNED NOT NULL,
-    PRIMARY KEY (recipeID)
-    FOREIGN KEY (productID) REFERENCES Products (productID)
-        ON DELETE CASCADE  -- Delete recipe if product is deleted
-        ON UPDATE CASCADE, -- Update if productID changes
-    FOREIGN KEY (ingredientID) REFERENCES Ingredients (ingredientID)
-        ON DELETE CASCADE  -- Delete recipe if ingredient is deleted
-        ON UPDATE CASCADE  -- Update if ingredientID changes
+    FOREIGN KEY (productID) REFERENCES Products(productID)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (ingredientID) REFERENCES Ingredients(ingredientID)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 -- Sales (independent)
@@ -63,18 +62,17 @@ CREATE TABLE Sales (
 
 -- Sale_Details (M:M bridge)
 CREATE TABLE Sale_Details (
-    saleDetailsID INT AUTO_INCREMENT UNIQUE NOT NULL,
+    saleDetailsID INT AUTO_INCREMENT PRIMARY KEY,
     saleID INT NOT NULL,
     productID INT NOT NULL,
     quantity INT UNSIGNED NOT NULL,
     salePrice DECIMAL(10, 2) NOT NULL,
-    PRIMARY KEY (saleDetailsID)
-    FOREIGN KEY (saleID) REFERENCES Sales (saleID)
-        ON DELETE CASCADE  -- Delete details if sale is deleted
-        ON UPDATE CASCADE, -- Update if saleID changes
-    FOREIGN KEY (productID) REFERENCES Products (productID)
-        ON DELETE RESTRICT  -- Prevent product deletion if sales exist
-        ON UPDATE CASCADE   -- Update if productID changes
+    FOREIGN KEY (saleID) REFERENCES Sales(saleID)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (productID) REFERENCES Products(productID)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
 
 -- ===========================================================================
@@ -90,19 +88,19 @@ VALUES
 
 -- Ingredients
 INSERT INTO Ingredients (name, unit, costPerUnit, stock, supplierID)
-SELECT "Lemons", "pieces", 0.29, 2500, supplierID 
+SELECT "Lemons", "pieces", 7.25, 2500, supplierID 
 FROM Suppliers WHERE name = "Wario's Warehouse"
 UNION ALL
-SELECT "Sugar", "grams", 0.0039, 2500, supplierID 
+SELECT "Sugar", "grams", 9.75, 2500, supplierID 
 FROM Suppliers WHERE name = "Wario's Warehouse"
 UNION ALL
-SELECT "Water", "ml", 0.002, 2500, supplierID 
+SELECT "Water", "ml", 5.00, 2500, supplierID 
 FROM Suppliers WHERE name = "Wario's Warehouse"
 UNION ALL
-SELECT "Strawberries", "pieces", 0.42, 1500, supplierID 
+SELECT "Strawberries", "pieces", 10.50, 1500, supplierID 
 FROM Suppliers WHERE name = "Stan's Store"
 UNION ALL
-SELECT "Watermelons", "pieces", 4.20, 1500, supplierID 
+SELECT "Watermelons", "pieces", 10.50, 1500, supplierID 
 FROM Suppliers WHERE name = "Garry's Garden";
 
 -- Products
