@@ -1,29 +1,34 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_mysqldb import MySQL
+import os
 
 app = Flask(__name__)
 
 # Database configuration remains the same
 app.config['MYSQL_HOST'] = 'classmysql.engr.oregonstate.edu'
-app.config['MYSQL_USER'] = 'cs340_[your_onid]'
-app.config['MYSQL_PASSWORD'] = '[your_db_password]'
-app.config['MYSQL_DB'] = 'cs340_[your_onid]'
+app.config['MYSQL_USER'] = 'cs340_davidrya'
+app.config['MYSQL_PASSWORD'] = 'vrjPi3Dt0Sta'
+app.config['MYSQL_DB'] = 'cs340_davidrya'
 app.config['MYSQL_CURSORCLASS'] = "DictCursor"
 app.config['MYSQL_AUTOCOMMIT'] = True
 
 mysql = MySQL(app)
 
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+FRONTEND_DIST = os.path.join(BASE_DIR, '../frontend/dist')
+
+
 # ===========================================================================
 # PRODUCTS ROUTES
 # ===========================================================================
-@app.route('/products', methods=['GET'])
+@app.route('/api/products', methods=['GET'])
 def get_products():
     cursor = mysql.connection.cursor()
     cursor.execute("SELECT * FROM Products")
     products = cursor.fetchall()
     return jsonify(products)
 
-@app.route('/products', methods=['POST'])
+@app.route('/api/products', methods=['POST'])
 def create_product():
     data = request.json
     cursor = mysql.connection.cursor()
@@ -31,14 +36,14 @@ def create_product():
     mysql.connection.commit()
     return jsonify({"message": "Product created"}), 201
 
-@app.route('/products/<int:product_id>', methods=['GET'])
+@app.route('/api/products/<int:product_id>', methods=['GET'])
 def get_product(product_id):
     cursor = mysql.connection.cursor()
     cursor.callproc('GetProduct', [product_id])
     product = cursor.fetchone()
     return jsonify(product)
 
-@app.route('/products/<int:product_id>', methods=['PUT'])
+@app.route('/api/products/<int:product_id>', methods=['PUT'])
 def update_product(product_id):
     data = request.json
     cursor = mysql.connection.cursor()
@@ -46,7 +51,7 @@ def update_product(product_id):
     mysql.connection.commit()
     return jsonify({"message": "Product updated"})
 
-@app.route('/products/<int:product_id>', methods=['DELETE'])
+@app.route('/api/products/<int:product_id>', methods=['DELETE'])
 def delete_product(product_id):
     cursor = mysql.connection.cursor()
     cursor.callproc('DeleteProduct', [product_id])
@@ -56,14 +61,14 @@ def delete_product(product_id):
 # ===========================================================================
 # INGREDIENTS ROUTES
 # ===========================================================================
-@app.route('/ingredients', methods=['GET'])
+@app.route('/api/ingredients', methods=['GET'])
 def get_ingredients():
     cursor = mysql.connection.cursor()
     cursor.execute("SELECT * FROM Ingredients")
     ingredients = cursor.fetchall()
     return jsonify(ingredients)
 
-@app.route('/ingredients', methods=['POST'])
+@app.route('/api/ingredients', methods=['POST'])
 def create_ingredient():
     data = request.json
     cursor = mysql.connection.cursor()
@@ -77,14 +82,14 @@ def create_ingredient():
     mysql.connection.commit()
     return jsonify({"message": "Ingredient created"}), 201
 
-@app.route('/ingredients/<int:ingredient_id>', methods=['GET'])
+@app.route('/api/ingredients/<int:ingredient_id>', methods=['GET'])
 def get_ingredient(ingredient_id):
     cursor = mysql.connection.cursor()
     cursor.callproc('GetIngredient', [ingredient_id])
     ingredient = cursor.fetchone()
     return jsonify(ingredient)
 
-@app.route('/ingredients/<int:ingredient_id>', methods=['PUT'])
+@app.route('/api/ingredients/<int:ingredient_id>', methods=['PUT'])
 def update_ingredient(ingredient_id):
     data = request.json
     cursor = mysql.connection.cursor()
@@ -102,14 +107,14 @@ def update_ingredient(ingredient_id):
 # ===========================================================================
 # SUPPLIERS ROUTES
 # ===========================================================================
-@app.route('/suppliers', methods=['GET'])
+@app.route('/api/suppliers', methods=['GET'])
 def get_suppliers():
     cursor = mysql.connection.cursor()
     cursor.execute("SELECT * FROM Suppliers")
     suppliers = cursor.fetchall()
     return jsonify(suppliers)
 
-@app.route('/suppliers', methods=['POST'])
+@app.route('/api/suppliers', methods=['POST'])
 def create_supplier():
     data = request.json
     cursor = mysql.connection.cursor()
@@ -117,14 +122,14 @@ def create_supplier():
     mysql.connection.commit()
     return jsonify({"message": "Supplier created"}), 201
 
-@app.route('/suppliers/<int:supplier_id>', methods=['GET'])
+@app.route('/api/suppliers/<int:supplier_id>', methods=['GET'])
 def get_supplier(supplier_id):
     cursor = mysql.connection.cursor()
     cursor.callproc('GetSupplier', [supplier_id])
     supplier = cursor.fetchone()
     return jsonify(supplier)
 
-@app.route('/suppliers/<int:supplier_id>', methods=['PUT'])
+@app.route('/api/suppliers/<int:supplier_id>', methods=['PUT'])
 def update_supplier(supplier_id):
     data = request.json
     cursor = mysql.connection.cursor()
@@ -132,7 +137,7 @@ def update_supplier(supplier_id):
     mysql.connection.commit()
     return jsonify({"message": "Supplier updated"})
 
-@app.route('/suppliers/<int:supplier_id>', methods=['DELETE'])
+@app.route('/api/suppliers/<int:supplier_id>', methods=['DELETE'])
 def delete_supplier(supplier_id):
     cursor = mysql.connection.cursor()
     cursor.callproc('DeleteSupplier', [supplier_id])
@@ -142,14 +147,14 @@ def delete_supplier(supplier_id):
 # ===========================================================================
 # SALES ROUTES
 # ===========================================================================
-@app.route('/sales', methods=['GET'])
+@app.route('/api/sales', methods=['GET'])
 def get_sales():
     cursor = mysql.connection.cursor()
     cursor.execute("SELECT * FROM Sales")
     sales = cursor.fetchall()
     return jsonify(sales)
 
-@app.route('/sales', methods=['POST'])
+@app.route('/api/sales', methods=['POST'])
 def create_sale():
     data = request.json
     cursor = mysql.connection.cursor()
@@ -158,14 +163,14 @@ def create_sale():
     new_sale_id = result['newSaleID']
     return jsonify({"message": "Sale created", "saleID": new_sale_id}), 201
 
-@app.route('/sales/<int:sale_id>', methods=['GET'])
+@app.route('/api/sales/<int:sale_id>', methods=['GET'])
 def get_sale(sale_id):
     cursor = mysql.connection.cursor()
     cursor.callproc('GetSale', [sale_id])
     sale = cursor.fetchone()
     return jsonify(sale)
 
-@app.route('/sales/<int:sale_id>', methods=['PUT'])
+@app.route('/api/sales/<int:sale_id>', methods=['PUT'])
 def update_sale(sale_id):
     data = request.json
     cursor = mysql.connection.cursor()
@@ -173,7 +178,7 @@ def update_sale(sale_id):
     mysql.connection.commit()
     return jsonify({"message": "Sale updated"})
 
-@app.route('/sales/<int:sale_id>', methods=['DELETE'])
+@app.route('/api/sales/<int:sale_id>', methods=['DELETE'])
 def delete_sale(sale_id):
     cursor = mysql.connection.cursor()
     cursor.callproc('DeleteSale', [sale_id])
@@ -183,14 +188,14 @@ def delete_sale(sale_id):
 # ===========================================================================
 # RECIPES ROUTES (PRODUCT_INGREDIENTS)
 # ===========================================================================
-@app.route('/products/<int:product_id>/ingredients', methods=['GET'])
+@app.route('/api/products/<int:product_id>/ingredients', methods=['GET'])
 def get_product_ingredients(product_id):
     cursor = mysql.connection.cursor()
     cursor.callproc('GetRecipeByProduct', [product_id])
     recipes = cursor.fetchall()
     return jsonify(recipes)
 
-@app.route('/products/<int:product_id>/ingredients', methods=['POST'])
+@app.route('/api/products/<int:product_id>/ingredients', methods=['POST'])
 def create_recipe(product_id):
     data = request.json
     cursor = mysql.connection.cursor()
@@ -198,7 +203,7 @@ def create_recipe(product_id):
     mysql.connection.commit()
     return jsonify({"message": "Ingredient added to product"}), 201
 
-@app.route('/products/<int:product_id>/ingredients/<int:ingredient_id>', methods=['PUT'])
+@app.route('/api/products/<int:product_id>/ingredients/<int:ingredient_id>', methods=['PUT'])
 def update_recipe(product_id, ingredient_id):
     data = request.json
     cursor = mysql.connection.cursor()
@@ -206,7 +211,7 @@ def update_recipe(product_id, ingredient_id):
     mysql.connection.commit()
     return jsonify({"message": "Recipe updated"})
 
-@app.route('/products/<int:product_id>/ingredients/<int:ingredient_id>', methods=['DELETE'])
+@app.route('/api/products/<int:product_id>/ingredients/<int:ingredient_id>', methods=['DELETE'])
 def delete_recipe(product_id, ingredient_id):
     cursor = mysql.connection.cursor()
     cursor.callproc('DeleteRecipe', [product_id, ingredient_id])
@@ -216,14 +221,14 @@ def delete_recipe(product_id, ingredient_id):
 # ===========================================================================
 # SALE DETAILS ROUTES
 # ===========================================================================
-@app.route('/sales/<int:sale_id>/details', methods=['GET'])
+@app.route('/api/sales/<int:sale_id>/details', methods=['GET'])
 def get_sale_details(sale_id):
     cursor = mysql.connection.cursor()
     cursor.callproc('GetSaleDetails', [sale_id])
     details = cursor.fetchall()
     return jsonify(details)
 
-@app.route('/sales/<int:sale_id>/details', methods=['POST'])
+@app.route('/api/sales/<int:sale_id>/details', methods=['POST'])
 def create_sale_detail(sale_id):
     data = request.json
     cursor = mysql.connection.cursor()
@@ -231,7 +236,7 @@ def create_sale_detail(sale_id):
     mysql.connection.commit()
     return jsonify({"message": "Product added to sale"}), 201
 
-@app.route('/sales/<int:sale_id>/details/<int:product_id>', methods=['PUT'])
+@app.route('/api/sales/<int:sale_id>/details/<int:product_id>', methods=['PUT'])
 def update_sale_detail(sale_id, product_id):
     data = request.json
     cursor = mysql.connection.cursor()
@@ -239,7 +244,7 @@ def update_sale_detail(sale_id, product_id):
     mysql.connection.commit()
     return jsonify({"message": "Sale detail updated"})
 
-@app.route('/sales/<int:sale_id>/details/<int:product_id>', methods=['DELETE'])
+@app.route('/api/sales/<int:sale_id>/details/<int:product_id>', methods=['DELETE'])
 def delete_sale_detail(sale_id, product_id):
     cursor = mysql.connection.cursor()
     cursor.callproc('DeleteSaleDetail', [sale_id, product_id])
@@ -249,12 +254,28 @@ def delete_sale_detail(sale_id, product_id):
 # ===========================================================================
 # RESET DATABASE
 # ===========================================================================
-@app.route('/reset', methods=['POST'])
+@app.route('/api/reset', methods=['POST'])
 def reset_database():
     cursor = mysql.connection.cursor()
     cursor.callproc('ResetDatabase')
     mysql.connection.commit()
     return jsonify({"message": "Database reset to initial state"})
+
+
+# ===========================================================================
+# SERVE FRONTEND
+# ===========================================================================
+# Serve static files
+@app.route('/assets/<path:filename>')
+def serve_static(filename):
+    return send_from_directory(os.path.join(FRONTEND_DIST, 'assets'), filename)
+
+# Serve Vue application
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_vue_app(path):
+    return send_from_directory(FRONTEND_DIST, 'index.html')
+
 
 # Listener
 if __name__ == "__main__":

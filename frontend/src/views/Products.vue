@@ -1,57 +1,53 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import BackButton from "../components/Button.vue";
 import { Pencil, X, Plus } from "lucide-vue-next";
+import axios from "axios";
 
 // Sample data
-const ingredientsList = [
-  { ingredientID: 1, unit: "pieces", name: "Lemons" },
-  { ingredientID: 2, unit: "g", name: "Sugar" },
-  { ingredientID: 3, unit: "ml", name: "Water" },
-  { ingredientID: 4, unit: "pieces", name: "Strawberries" },
-  { ingredientID: 5, unit: "pieces", name: "Watermelons" },
-];
+const ingredients = ref([]);
+const products = ref([]);
 
-const products = ref([
-  {
-    productID: 1,
-    name: "Classic",
-    price: 5.0,
-    ingredients: [
-      { ingredientID: 1, unit: "pieces", name: "Lemons", unitQuantityRequired: 10 },
-      { ingredientID: 2, unit: "g", name: "Sugar", unitQuantityRequired: 10 },
-      { ingredientID: 3, unit: "ml", name: "Water", unitQuantityRequired: 10 },
-    ],
-  },
-  {
-    productID: 2,
-    name: "Strawberry",
-    price: 7.25,
-    ingredients: [
-      { ingredientID: 1, unit: "pieces", name: "Lemons", unitQuantityRequired: 5 },
-      { ingredientID: 2, unit: "g", name: "Sugar", unitQuantityRequired: 10 },
-      { ingredientID: 3, unit: "ml", name: "Water", unitQuantityRequired: 10 },
-      { ingredientID: 4, unit: "pieces", name: "Strawberries", unitQuantityRequired: 5 },
-    ],
-  },
-  {
-    productID: 3,
-    name: "Watermelon",
-    price: 7.25,
-    ingredients: [
-      { ingredientID: 2, unit: "g", name: "Sugar", unitQuantityRequired: 10 },
-      { ingredientID: 3, unit: "ml", name: "Water", unitQuantityRequired: 10 },
-      { ingredientID: 5, unit: "pieces", name: "Watermelons", unitQuantityRequired: 10 },
-    ],
-  },
-]);
-
-const isModalOpen = ref(false);
-const selected = ref("");
 const newProduct = ref({
   name: "",
   price: 0,
   ingredients: [],
+});
+
+async function loadIngredients() {
+  try {
+    const res = await axios.get("/api/ingredients");
+    ingredients.value = res.data;
+    console.log(res.data);
+  } catch (err) {
+    console.log("Error: ", err);
+  }
+}
+
+async function loadProducts() {
+  try {
+    const res = await axios.get("/api/products");
+    const product_details = await Promise.all(
+      res.data.map(async (p) => {
+        const recipe = await axios.get(`/api/products/${p.productID}/ingredients`);
+        console.log(recipe.data);
+        return {
+          ...p,
+          ingredients: recipe.data,
+        };
+      })
+    );
+
+    products.value = product_details;
+    console.log(product_details);
+  } catch (err) {
+    console.log("Error: ", err);
+  }
+}
+
+onMounted(() => {
+  loadIngredients();
+  loadProducts();
 });
 
 function newProductAddIngredient() {
@@ -70,6 +66,10 @@ function submitNewProduct() {
   console.log("New Product:", newProduct.value);
   closeModal();
 }
+
+// UI
+const isModalOpen = ref(false);
+const selected = ref("");
 
 function closeModal() {
   isModalOpen.value = false;
@@ -129,7 +129,7 @@ function onRemove(id) {
           <tr @click="toggleExpand(p.productID)" class="cursor-pointer hover:bg-(--base)">
             <td class="px-4 py-2 text-left">{{ p.productID }}</td>
             <td class="px-4 py-2 text-left">{{ p.name }}</td>
-            <td class="px-4 py-2 text-left">{{ p.price.toFixed(2) }}</td>
+            <td class="px-4 py-2 text-left">{{ p.price }}</td>
             <td class="px-4 py-2 text-right space-x-2">
               <button
                 @click.stop="onEdit(p.productID)"

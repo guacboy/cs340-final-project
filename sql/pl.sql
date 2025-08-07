@@ -25,6 +25,14 @@ BEGIN
 END //
 DELIMITER ;
 
+-- Read All Products
+DELIMITER //
+CREATE PROCEDURE GetProducts()
+BEGIN
+    SELECT * FROM Products;
+END //
+DELIMITER ;
+
 -- Update Product
 DELIMITER //
 CREATE PROCEDURE UpdateProduct(
@@ -122,7 +130,8 @@ CREATE PROCEDURE GetRecipeByProduct(
     IN p_productID INT
 )
 BEGIN
-    SELECT * FROM Product_Ingredients
+    SELECT * FROM Product_Ingredients pi
+    JOIN Ingredients i ON pi.ingredientID = i.ingredientID
     WHERE productID = p_productID;
 END //
 DELIMITER ;
