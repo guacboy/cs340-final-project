@@ -1,14 +1,14 @@
 <script setup>
-import { ref } from 'vue'
+import { ref } from "vue";
+import ResetDBButton from "../components/ResetDBButton.vue";
 
 const sections = ref([
-  { name: 'products',    label: 'Products',    path: '/products' },
-  { name: 'sales',       label: 'Sales',       path: '/sales' },
-  { name: 'ingredients', label: 'Ingredients', path: '/ingredients' },
-  { name: 'suppliers',   label: 'Suppliers',   path: '/suppliers' },
-])
+  { name: "products", label: "Products", path: "/products" },
+  { name: "sales", label: "Sales", path: "/sales" },
+  { name: "ingredients", label: "Ingredients", path: "/ingredients" },
+  { name: "suppliers", label: "Suppliers", path: "/suppliers" },
+]);
 </script>
-
 
 <template>
   <div class="flex flex-col items-center p-8 space-y-6">
@@ -24,6 +24,6 @@ const sections = ref([
         <span class="text-2xl font-semibold">{{ item.label }}</span>
       </RouterLink>
     </div>
+    <ResetDBButton />
   </div>
 </template>
-

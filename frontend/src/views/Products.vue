@@ -4,6 +4,7 @@ import BackButton from "../components/Button.vue";
 import InlineEditableRow from "../components/InlineEditableRow.vue";
 import { Pencil, X, Plus } from "lucide-vue-next";
 import axios from "axios";
+import ResetDBButton from "../components/ResetDBButton.vue";
 
 // Sample data
 const ingredients = ref([]);
@@ -19,7 +20,6 @@ async function loadIngredients() {
   try {
     const res = await axios.get("/api/ingredients");
     ingredients.value = res.data;
-    console.log(res.data);
   } catch (err) {
     console.log("Error: ", err);
   }
@@ -31,7 +31,6 @@ async function loadProducts() {
     const product_details = await Promise.all(
       res.data.map(async (p) => {
         const recipe = await axios.get(`/api/products/${p.productID}/ingredients`);
-        console.log(recipe.data);
         return {
           ...p,
           ingredients: recipe.data,
@@ -40,7 +39,6 @@ async function loadProducts() {
     );
 
     products.value = product_details;
-    console.log(product_details);
   } catch (err) {
     console.log("Error: ", err);
   }
@@ -53,7 +51,7 @@ onMounted(() => {
 
 function newProductAddIngredient() {
   newProduct.value.ingredients.push({
-    ingredientID: "",
+    ingredientID: 0,
     name: "",
     unitQuantityRequired: 0,
   });
@@ -63,14 +61,29 @@ function newProductRemoveIngredient(index) {
   newProduct.value.ingredients.splice(index, 1);
 }
 
-function submitNewProduct() {
-  console.log("New Product:", newProduct.value);
+async function submitNewProduct() {
+  const productRes = await axios.post("/api/products", {
+    name: newProduct.value.name,
+    price: newProduct.value.price,
+  });
+  const productID = productRes.data.productID;
+  if (newProduct.value.ingredients.length > 0) {
+    await axios.post(`/api/products/${productID}/ingredients`, {
+      ingredients: newProduct.value.ingredients,
+    });
+  }
+
+  await loadProducts();
   closeModal();
 }
 
 // UI
-const isModalOpen = ref(false);
 const selected = ref("");
+const isModalOpen = ref(false);
+
+function onAdd() {
+  isModalOpen.value = true;
+}
 
 function closeModal() {
   isModalOpen.value = false;
@@ -90,9 +103,17 @@ function toggleExpand(id) {
   }
 }
 
-function onRemove(id) {
-  console.log("Remove Product ID:", id);
-  alert("Deleting Product ID: " + id);
+async function onRemove(id) {
+  if (!confirm(`Are you sure you want to delete product ID: ${id}?`)) {
+    return;
+  }
+  try {
+    const res = await axios.delete(`/api/products/${id}`);
+    products.value = products.value.filter((p) => p.productID !== id);
+  } catch (err) {
+    console.log("Error deleting ", err);
+    alert("You cannot delete a product that is referenced in a SaleDetails.");
+  }
 }
 
 // Edit Table Row
@@ -263,12 +284,12 @@ function saveEdit(id, update) {
             class="flex items-center gap-2 mt-1"
           >
             <select
-              v-model="ingredient.ingredientID"
+              v-model.number="ingredient.ingredientID"
               class="w-1/2 rounded border border-grey-600 bg-(--base) p-2 focus:outline-none focus:ring-1 focus:ring-(--grey)"
             >
               <option disabled value="">Select one</option>
               <option
-                v-for="ingr in ingredientsList"
+                v-for="ingr in ingredients"
                 :key="ingr.ingredientID"
                 :value="ingr.ingredientID"
               >

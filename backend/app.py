@@ -1,14 +1,17 @@
 from flask import Flask, jsonify, request, send_from_directory
 from flask_mysqldb import MySQL
+from dotenv import load_dotenv
 import os
+
+load_dotenv()
 
 app = Flask(__name__)
 
 # Database configuration remains the same
-app.config['MYSQL_HOST'] = 'classmysql.engr.oregonstate.edu'
-app.config['MYSQL_USER'] = 'cs340_davidrya'
-app.config['MYSQL_PASSWORD'] = 'vrjPi3Dt0Sta'
-app.config['MYSQL_DB'] = 'cs340_davidrya'
+app.config['MYSQL_HOST'] = os.getenv('DB_HOST')
+app.config['MYSQL_USER'] = os.getenv('DB_USER')
+app.config['MYSQL_PASSWORD'] = os.getenv('DB_PASS')
+app.config['MYSQL_DB'] = os.getenv('DB_NAME')
 app.config['MYSQL_CURSORCLASS'] = "DictCursor"
 app.config['MYSQL_AUTOCOMMIT'] = True
 
@@ -31,10 +34,16 @@ def get_products():
 @app.route('/api/products', methods=['POST'])
 def create_product():
     data = request.json
+    print(data)
     cursor = mysql.connection.cursor()
-    cursor.callproc('CreateProduct', [data['name'], data['price']])
+    cursor.execute('CALL CreateProduct(%s, %s)', (data['name'], data['price']))
+    result = cursor.fetchone()
+    productID = result['id']
+    while cursor.nextset():
+        pass
     mysql.connection.commit()
-    return jsonify({"message": "Product created"}), 201
+    cursor.close()
+    return jsonify({"message": "Product created", "productID": productID}), 201
 
 @app.route('/api/products/<int:product_id>', methods=['GET'])
 def get_product(product_id):
@@ -198,10 +207,12 @@ def get_product_ingredients(product_id):
 @app.route('/api/products/<int:product_id>/ingredients', methods=['POST'])
 def create_recipe(product_id):
     data = request.json
+    print(data)
     cursor = mysql.connection.cursor()
-    cursor.callproc('CreateRecipe', [product_id, data['ingredientID'], data['unitQuantityRequired']])
+    for ingredient in data.get('ingredients', []):
+        cursor.callproc('CreateRecipe', [product_id, ingredient['ingredientID'], ingredient['unitQuantityRequired']])
     mysql.connection.commit()
-    return jsonify({"message": "Ingredient added to product"}), 201
+    return jsonify({"message": "Ingredients added to product"}), 201
 
 @app.route('/api/products/<int:product_id>/ingredients/<int:ingredient_id>', methods=['PUT'])
 def update_recipe(product_id, ingredient_id):
