@@ -3,6 +3,7 @@
 -- ===========================================================================
 
 -- Create Product
+DROP PROCEDURE IF EXISTS CreateProduct;
 DELIMITER //
 CREATE PROCEDURE CreateProduct(
     IN p_name VARCHAR(150),
@@ -16,6 +17,7 @@ END //
 DELIMITER ;
 
 -- Read Product
+DROP PROCEDURE IF EXISTS GetProduct;
 DELIMITER //
 CREATE PROCEDURE GetProduct(
     IN p_productID INT
@@ -27,6 +29,7 @@ END //
 DELIMITER ;
 
 -- Read All Products
+DROP PROCEDURE IF EXISTS GetProducts;
 DELIMITER //
 CREATE PROCEDURE GetProducts()
 BEGIN
@@ -35,6 +38,7 @@ END //
 DELIMITER ;
 
 -- Update Product
+DROP PROCEDURE IF EXISTS UpdateProduct;
 DELIMITER //
 CREATE PROCEDURE UpdateProduct(
     IN p_productID INT,
@@ -49,6 +53,7 @@ END //
 DELIMITER ;
 
 -- Delete Product
+DROP PROCEDURE IF EXISTS DeleteProduct;
 DELIMITER //
 CREATE PROCEDURE DeleteProduct(IN p_productID INT)
 BEGIN
@@ -62,6 +67,7 @@ DELIMITER ;
 -- ===========================================================================
 
 -- Create Ingredient
+DROP PROCEDURE IF EXISTS CreateIngredient;
 DELIMITER //
 CREATE PROCEDURE CreateIngredient(
     IN p_name VARCHAR(150),
@@ -77,6 +83,7 @@ END //
 DELIMITER ;
 
 -- Read Ingredient
+DROP PROCEDURE IF EXISTS GetIngredient;
 DELIMITER //
 CREATE PROCEDURE GetIngredient(
     IN p_ingredientID INT
@@ -88,6 +95,7 @@ END //
 DELIMITER ;
 
 -- Update Ingredient
+DROP PROCEDURE IF EXISTS UpdateIngredient;
 DELIMITER //
 CREATE PROCEDURE UpdateIngredient(
     IN p_ingredientID INT,
@@ -113,6 +121,7 @@ DELIMITER ;
 -- ===========================================================================
 
 -- Create Product Ingredient Relationship
+DROP PROCEDURE IF EXISTS CreateRecipe;
 DELIMITER //
 CREATE PROCEDURE CreateRecipe(
     IN p_productID INT,
@@ -126,6 +135,7 @@ END //
 DELIMITER ;
 
 -- Read Recipe by Product
+DROP PROCEDURE IF EXISTS GetRecipeByProduct;
 DELIMITER //
 CREATE PROCEDURE GetRecipeByProduct(
     IN p_productID INT
@@ -138,6 +148,7 @@ END //
 DELIMITER ;
 
 -- Update Recipe
+DROP PROCEDURE IF EXISTS UpdateRecipe;
 DELIMITER //
 CREATE PROCEDURE UpdateRecipe(
     IN p_productID INT,
@@ -152,6 +163,7 @@ END //
 DELIMITER ;
 
 -- Delete Recipe
+DROP PROCEDURE IF EXISTS DeleteRecipe;
 DELIMITER //
 CREATE PROCEDURE DeleteRecipe(
     IN p_productID INT,
@@ -168,6 +180,7 @@ DELIMITER ;
 -- ===========================================================================
 
 -- Create Supplier
+DROP PROCEDURE IF EXISTS CreateSupplier;
 DELIMITER //
 CREATE PROCEDURE CreateSupplier(
     IN p_name VARCHAR(150),
@@ -181,6 +194,7 @@ END //
 DELIMITER ;
 
 -- Read Supplier
+DROP PROCEDURE IF EXISTS GetSupplier;
 DELIMITER //
 CREATE PROCEDURE GetSupplier(
     IN p_supplierID INT
@@ -192,6 +206,7 @@ END //
 DELIMITER ;
 
 -- Update Supplier
+DROP PROCEDURE IF EXISTS UpdateSupplier;
 DELIMITER //
 CREATE PROCEDURE UpdateSupplier(
     IN p_supplierID INT,
@@ -207,6 +222,7 @@ END //
 DELIMITER ;
 
 -- Delete Supplier
+DROP PROCEDURE IF EXISTS DeleteSupplier;
 DELIMITER //
 CREATE PROCEDURE DeleteSupplier(
     IN p_supplierID INT
@@ -222,6 +238,7 @@ DELIMITER ;
 -- ===========================================================================
 
 -- Create Sale
+DROP PROCEDURE IF EXISTS CreateSale;
 DELIMITER //
 CREATE PROCEDURE CreateSale(IN p_saleDate TIMESTAMP)
 BEGIN
@@ -231,6 +248,7 @@ END //
 DELIMITER ;
 
 -- Read Sale
+DROP PROCEDURE IF EXISTS GetSale;
 DELIMITER //
 CREATE PROCEDURE GetSale(
     IN p_saleID INT
@@ -242,6 +260,7 @@ END //
 DELIMITER ;
 
 -- Update Sale Date
+DROP PROCEDURE IF EXISTS UpdateSaleDate;
 DELIMITER //
 CREATE PROCEDURE UpdateSaleDate(
     IN p_saleID INT,
@@ -255,6 +274,7 @@ END //
 DELIMITER ;
 
 -- Delete Sale
+DROP PROCEDURE IF EXISTS DeleteSale;
 DELIMITER //
 CREATE PROCEDURE DeleteSale(
     IN p_saleID INT
@@ -270,6 +290,7 @@ DELIMITER ;
 -- ===========================================================================
 
 -- Create Sale Detail
+DROP PROCEDURE IF EXISTS CreateSaleDetail;
 DELIMITER //
 CREATE PROCEDURE CreateSaleDetail(
     IN p_saleID INT,
@@ -284,6 +305,7 @@ END //
 DELIMITER ;
 
 -- Read Sale Details by Sale
+DROP PROCEDURE IF EXISTS GetSaleDetails;
 DELIMITER //
 CREATE PROCEDURE GetSaleDetails(IN p_saleID INT)
 BEGIN
@@ -293,6 +315,7 @@ END //
 DELIMITER ;
 
 -- Update Sale Detail
+DROP PROCEDURE IF EXISTS UpdateSaleDetail;
 DELIMITER //
 CREATE PROCEDURE UpdateSaleDetail(
     IN p_saleID INT,
@@ -308,6 +331,7 @@ END //
 DELIMITER ;
 
 -- Delete Sale Detail
+DROP PROCEDURE IF EXISTS DeleteSaleDetail;
 DELIMITER //
 CREATE PROCEDURE DeleteSaleDetail(
     IN p_saleID INT,
@@ -320,6 +344,7 @@ END //
 DELIMITER ;
 
 -- Reset Sale_Details
+DROP PROCEDURE IF EXISTS CreateSaleDetailWithReset;
 DELIMITER //
 CREATE PROCEDURE CreateSaleDetailWithReset(
     IN p_saleID INT,
@@ -351,6 +376,7 @@ DELIMITER ;
 -- ===========================================================================
 -- RESET FUNCTIONALITY
 -- ===========================================================================
+DROP PROCEDURE IF EXISTS ResetDatabase;
 DELIMITER //
 CREATE PROCEDURE ResetDatabase()
 BEGIN

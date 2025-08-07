@@ -8,6 +8,7 @@ const isResetting = ref(false);
 async function resetDB() {
   isResetting.value = true;
   const res = await axios.post("/api/reset");
+  alert("Database has been reset.")
   isResetting.value = false;
 }
 </script>
