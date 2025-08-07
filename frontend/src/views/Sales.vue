@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import InlineEditableRow from "../components/InlineEditableRow.vue";
 import BackButton from "../components/Button.vue";
 import { Pencil, X } from "lucide-vue-next";
 
@@ -37,9 +38,23 @@ function toggleExpand(id) {
   }
 }
 
-function onEdit(id) {
-  console.log("Edit Sale ID:", id);
-  alert("Editing Sale ID: " + id);
+// Edit Table Row
+const editingID = ref(null);
+
+function startEdit(id) {
+  editingID.value = id;
+}
+
+function cancelEdit() {
+  editingID.value = null;
+}
+
+function saveEdit(id, update) {
+  const index = sales.value.findIndex(s => s.saleID === id);
+  if (index !== -1) {
+    sales.value[index] = { ...sales.value[index], ...update };
+  }
+  cancelEdit();
 }
 
 function onRemove(id) {
@@ -66,13 +81,44 @@ function onRemove(id) {
       </thead>
       <tbody class="divide-y divide-(--grey)">
         <template v-for="s in sales" :key="s.saleID">
+
+
+          <template v-if="editingID === s.saleID">
+            <InlineEditableRow
+              :value="s"
+              :onSave="update => saveEdit(s.saleID, update)"
+              :onCancel="cancelEdit"
+            >
+              <template #cols="{ row }">
+                <td class="px-4 py-2 text-left">{{ row.saleID }}</td>
+                <td class="px-1">
+                  <input
+                    v-model="row.saleDate"
+                    type="text"
+                    class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
+                  />
+                </td>
+                <td class="px-1">
+                  <input
+                    v-model.number="row.totalRevenue"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
+                  />
+                </td>
+              </template>
+            </InlineEditableRow>
+          </template>
+
+          <template v-else>
           <tr @click="toggleExpand(s.saleID)" class="cursor-pointer hover:bg-(--base)">
             <td class="px-4 py-2 text-left">{{ s.saleID }}</td>
             <td class="px-4 py-2 text-left">{{ s.saleDate }}</td>
             <td class="px-4 py-2">{{ s.totalRevenue.toFixed(2) }}</td>
             <td class="px-4 py-2 text-right space-x-2">
               <button
-                @click.stop="onEdit(s.saleID)"
+                @click.stop="startEdit(s.saleID)"
                 class="cursor-pointer px-1 py-1 bg-(--secondary) text-black rounded-sm hover:bg-(--secondary-light) transition"
               >
                 <Pencil />
@@ -106,6 +152,7 @@ function onRemove(id) {
               </table>
             </td>
           </tr>
+          </template>
         </template>
       </tbody>
     </table>
