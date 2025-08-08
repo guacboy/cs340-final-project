@@ -1,73 +1,36 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import InlineEditableRow from "../components/InlineEditableRow.vue";
 import BackButton from "../components/Button.vue";
 import { Pencil, X, Plus } from "lucide-vue-next";
+import axios from "axios";
 
 // Sample data
-const ingredients = ref([
-  {
-    ingredientID: 1,
-    name: "Lemons",
-    unit: "pieces",
-    costPerUnit: 7.25,
-    stock: 2500,
-    supplierID: 1,
-  },
-  {
-    ingredientID: 2,
-    name: "Sugar",
-    unit: "g",
-    costPerUnit: 9.75,
-    stock: 2500,
-    supplierID: 1,
-  },
-  {
-    ingredientID: 3,
-    name: "Water",
-    unit: "ml",
-    costPerUnit: 5.0,
-    stock: 2500,
-    supplierID: 1,
-  },
-  {
-    ingredientID: 4,
-    name: "Strawberries",
-    unit: "pieces",
-    costPerUnit: 10.5,
-    stock: 1500,
-    supplierID: 2,
-  },
-  {
-    ingredientID: 5,
-    name: "Watermelons",
-    unit: "pieces",
-    costPerUnit: 10.5,
-    stock: 1500,
-    supplierID: 3,
-  },
-]);
+const ingredients = ref([]);
+const suppliers = ref([]);
 
-const suppliers = [
-  {
-    supplierID: 1,
-    name: "Wario's Warehouse",
-    phone: "1-800-555-1111",
-    email: "wario.warehouse@gmail.com",
-  },
-  {
-    supplierID: 2,
-    name: "Stan's Store",
-    phone: "1-800-555-2222",
-    email: "stan.store@hotmail.com",
-  },
-  {
-    supplierID: 3,
-    name: "Garry's Garden",
-    phone: "1-800-555-3333",
-    email: "garry.garden@yahoo.com",
-  },
-];
+async function loadIngredients() {
+  try {
+    const res = await axios.get("/api/ingredients");
+    ingredients.value = res.data;
+  } catch (err) {
+    console.log("Error: ", err);
+  }
+}
+
+async function loadSuppliers() {
+  try {
+    const res = await axios.get("/api/suppliers");
+    suppliers.value = res.data;
+  } catch (err) {
+    console.log("Error: ", err);
+  }
+}
+
+onMounted(() => {
+  loadIngredients();
+  loadSuppliers();
+});
 
 const isModalOpen = ref(false);
 const selected = ref("");
@@ -111,16 +74,17 @@ function cancelEdit() {
 }
 
 function saveEdit(id, update) {
-  const index = ingredients.value.findIndex(i => i.ingredientID === id);
+  const index = ingredients.value.findIndex((i) => i.ingredientID === id);
   if (index !== -1) {
     ingredients.value[index] = { ...ingredients.value[index], ...update };
   }
   cancelEdit();
 }
 
-function onRemove(id) {
-  console.log("Remove Ingredient ID:", id);
-  alert("Deleting Ingredient ID: " + id);
+async function onRemove(id) {
+  if (!confirm(`Are you sure you want to delete ingredient ID: ${id}?`)) {
+    return;
+  }
 }
 </script>
 
@@ -160,11 +124,10 @@ function onRemove(id) {
       </thead>
       <tbody class="divide-y divide-(--grey)">
         <template v-for="i in ingredients" :key="i.ingredientID">
-
           <template v-if="editingID === i.ingredientID">
             <InlineEditableRow
               :value="i"
-              :onSave="update => saveEdit(i.ingredientID, update)"
+              :onSave="(update) => saveEdit(i.ingredientID, update)"
               :onCancel="cancelEdit"
             >
               <template #cols="{ row }">
@@ -219,7 +182,7 @@ function onRemove(id) {
               <td class="px-4 py-2 text-left">{{ i.ingredientID }}</td>
               <td class="px-4 py-2 text-left">{{ i.name }}</td>
               <td class="px-4 py-2">{{ i.unit }}</td>
-              <td class="px-4 py-2">{{ i.costPerUnit.toFixed(2) }}</td>
+              <td class="px-4 py-2">{{ i.costPerUnit }}</td>
               <td class="px-4 py-2 text-left">{{ i.stock }}</td>
               <td class="px-4 py-2">{{ i.supplierID }}</td>
               <td class="px-4 py-2 text-right space-x-2">

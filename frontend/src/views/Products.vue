@@ -1,61 +1,85 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import BackButton from "../components/Button.vue";
 import InlineEditableRow from "../components/InlineEditableRow.vue";
 import { Pencil, X, Plus } from "lucide-vue-next";
+import axios from "axios";
+import ResetDBButton from "../components/ResetDBButton.vue";
 
 // Sample data
-const ingredientsList = [
-  { ingredientID: 1, unit: "pieces", name: "Lemons" },
-  { ingredientID: 2, unit: "g", name: "Sugar" },
-  { ingredientID: 3, unit: "ml", name: "Water" },
-  { ingredientID: 4, unit: "pieces", name: "Strawberries" },
-  { ingredientID: 5, unit: "pieces", name: "Watermelons" },
-];
+const ingredients = ref([]);
+const products = ref([]);
 
-const products = ref([
-  {
-    productID: 1,
-    name: "Classic",
-    price: 5.0,
-    ingredients: [
-      { ingredientID: 1, unit: "pieces", name: "Lemons", unitQuantityRequired: 10 },
-      { ingredientID: 2, unit: "g", name: "Sugar", unitQuantityRequired: 10 },
-      { ingredientID: 3, unit: "ml", name: "Water", unitQuantityRequired: 10 },
-    ],
-  },
-  {
-    productID: 2,
-    name: "Strawberry",
-    price: 7.25,
-    ingredients: [
-      { ingredientID: 1, unit: "pieces", name: "Lemons", unitQuantityRequired: 5 },
-      { ingredientID: 2, unit: "g", name: "Sugar", unitQuantityRequired: 10 },
-      { ingredientID: 3, unit: "ml", name: "Water", unitQuantityRequired: 10 },
-      { ingredientID: 4, unit: "pieces", name: "Strawberries", unitQuantityRequired: 5 },
-    ],
-  },
-  {
-    productID: 3,
-    name: "Watermelon",
-    price: 7.25,
-    ingredients: [
-      { ingredientID: 2, unit: "g", name: "Sugar", unitQuantityRequired: 10 },
-      { ingredientID: 3, unit: "ml", name: "Water", unitQuantityRequired: 10 },
-      { ingredientID: 5, unit: "pieces", name: "Watermelons", unitQuantityRequired: 10 },
-    ],
-  },
-]);
-
-
-// Form Modal
-const isModalOpen = ref(false);
-const selected = ref("");
 const newProduct = ref({
   name: "",
   price: 0,
   ingredients: [],
 });
+
+async function loadIngredients() {
+  try {
+    const res = await axios.get("/api/ingredients");
+    ingredients.value = res.data;
+  } catch (err) {
+    console.log("Error: ", err);
+  }
+}
+
+async function loadProducts() {
+  try {
+    const res = await axios.get("/api/products");
+    const product_details = await Promise.all(
+      res.data.map(async (p) => {
+        const recipe = await axios.get(`/api/products/${p.productID}/ingredients`);
+        return {
+          ...p,
+          ingredients: recipe.data,
+        };
+      })
+    );
+
+    products.value = product_details;
+  } catch (err) {
+    console.log("Error: ", err);
+  }
+}
+
+onMounted(() => {
+  loadIngredients();
+  loadProducts();
+});
+
+function newProductAddIngredient() {
+  newProduct.value.ingredients.push({
+    ingredientID: 0,
+    name: "",
+    unitQuantityRequired: 0,
+  });
+}
+
+function newProductRemoveIngredient(index) {
+  newProduct.value.ingredients.splice(index, 1);
+}
+
+async function submitNewProduct() {
+  const productRes = await axios.post("/api/products", {
+    name: newProduct.value.name,
+    price: newProduct.value.price,
+  });
+  const productID = productRes.data.productID;
+  if (newProduct.value.ingredients.length > 0) {
+    await axios.post(`/api/products/${productID}/ingredients`, {
+      ingredients: newProduct.value.ingredients,
+    });
+  }
+
+  await loadProducts();
+  closeModal();
+}
+
+// UI
+const selected = ref("");
+const isModalOpen = ref(false);
 
 function onAdd() {
   isModalOpen.value = true;
@@ -70,25 +94,6 @@ function closeModal() {
   };
 }
 
-function newProductAddIngredient() {
-  newProduct.value.ingredients.push({
-    ingredientID: "",
-    name: "",
-    unitQuantityRequired: 0,
-  });
-}
-
-function newProductRemoveIngredient(index) {
-  newProduct.value.ingredients.splice(index, 1);
-}
-
-function submitNewProduct() {
-  console.log("New Product:", newProduct.value);
-  closeModal();
-}
-
-
-// Table dropdown expansion
 const expanded = ref(new Set());
 function toggleExpand(id) {
   if (expanded.value.has(id)) {
@@ -98,9 +103,17 @@ function toggleExpand(id) {
   }
 }
 
-function onRemove(id) {
-  console.log("Remove Product ID:", id);
-  alert("Deleting Product ID: " + id);
+async function onRemove(id) {
+  if (!confirm(`Are you sure you want to delete product ID: ${id}?`)) {
+    return;
+  }
+  try {
+    const res = await axios.delete(`/api/products/${id}`);
+    products.value = products.value.filter((p) => p.productID !== id);
+  } catch (err) {
+    console.log("Error deleting ", err);
+    alert("You cannot delete a product that is referenced in a SaleDetails.");
+  }
 }
 
 // Edit Table Row
@@ -115,13 +128,12 @@ function cancelEdit() {
 }
 
 function saveEdit(id, update) {
-  const index = products.value.findIndex(p => p.productID === id);
+  const index = products.value.findIndex((p) => p.productID === id);
   if (index !== -1) {
     products.value[index] = { ...products.value[index], ...update };
   }
   cancelEdit();
 }
-
 </script>
 
 <template>
@@ -148,57 +160,54 @@ function saveEdit(id, update) {
       </thead>
       <tbody class="divide-y divide-(--grey)">
         <template v-for="p in products" :key="p.productID">
-
           <template v-if="editingID === p.productID">
             <InlineEditableRow
               :value="p"
-              :onSave="update => saveEdit(p.productID, update)"
+              :onSave="(update) => saveEdit(p.productID, update)"
               :onCancel="cancelEdit"
             >
-
-            <template #cols="{ row }">
-              <td class="px-4 py-2 text-left">{{ row.productID }}</td>
-              <td class="px-1">
-                <input
-                  v-model="row.name"
-                  type="text"
-                  class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
-                />
-              </td>
-              <td class="px-1">
-                <input
-                  v-model.number="row.price"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
-                />
-              </td>
-            </template>
-
+              <template #cols="{ row }">
+                <td class="px-4 py-2 text-left">{{ row.productID }}</td>
+                <td class="px-1">
+                  <input
+                    v-model="row.name"
+                    type="text"
+                    class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
+                  />
+                </td>
+                <td class="px-1">
+                  <input
+                    v-model.number="row.price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
+                  />
+                </td>
+              </template>
             </InlineEditableRow>
           </template>
 
           <template v-else>
-          <tr @click="toggleExpand(p.productID)" class="cursor-pointer hover:bg-(--base)">
-            <td class="px-4 py-2 text-left">{{ p.productID }}</td>
-            <td class="px-4 py-2 text-left">{{ p.name }}</td>
-            <td class="px-4 py-2 text-left">{{ p.price.toFixed(2) }}</td>
-            <td class="px-4 py-2 text-right space-x-2">
-              <button
-                @click.stop="startEdit(p.productID)"
-                class="cursor-pointer px-1 py-1 bg-(--secondary) text-black rounded-sm hover:bg-(--secondary-light) transition"
-              >
-                <Pencil />
-              </button>
-              <button
-                @click.stop="onRemove(p.productID)"
-                class="cursor-pointer px-1 py-1 bg-(--primary) text-black rounded-sm hover:bg-(--primary-light) transition"
-              >
-                <X />
-              </button>
-            </td>
-          </tr>
+            <tr @click="toggleExpand(p.productID)" class="cursor-pointer hover:bg-(--base)">
+              <td class="px-4 py-2 text-left">{{ p.productID }}</td>
+              <td class="px-4 py-2 text-left">{{ p.name }}</td>
+              <td class="px-4 py-2 text-left">{{ p.price }}</td>
+              <td class="px-4 py-2 text-right space-x-2">
+                <button
+                  @click.stop="startEdit(p.productID)"
+                  class="cursor-pointer px-1 py-1 bg-(--secondary) text-black rounded-sm hover:bg-(--secondary-light) transition"
+                >
+                  <Pencil />
+                </button>
+                <button
+                  @click.stop="onRemove(p.productID)"
+                  class="cursor-pointer px-1 py-1 bg-(--primary) text-black rounded-sm hover:bg-(--primary-light) transition"
+                >
+                  <X />
+                </button>
+              </td>
+            </tr>
           </template>
 
           <tr v-if="expanded.has(p.productID)">
@@ -222,8 +231,6 @@ function saveEdit(id, update) {
             </td>
           </tr>
         </template>
-
-
       </tbody>
     </table>
   </div>
@@ -277,12 +284,12 @@ function saveEdit(id, update) {
             class="flex items-center gap-2 mt-1"
           >
             <select
-              v-model="ingredient.ingredientID"
+              v-model.number="ingredient.ingredientID"
               class="w-1/2 rounded border border-grey-600 bg-(--base) p-2 focus:outline-none focus:ring-1 focus:ring-(--grey)"
             >
               <option disabled value="">Select one</option>
               <option
-                v-for="ingr in ingredientsList"
+                v-for="ingr in ingredients"
                 :key="ingr.ingredientID"
                 :value="ingr.ingredientID"
               >

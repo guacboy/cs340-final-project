@@ -1,30 +1,25 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import InlineEditableRow from "../components/InlineEditableRow.vue";
 import BackButton from "../components/Button.vue";
 import { Pencil, X, Plus } from "lucide-vue-next";
+import axios from "axios";
 
 // Sample data
-const suppliers = ref([
-  {
-    supplierID: 1,
-    name: "Wario's Warehouse",
-    phone: "1-800-555-1111",
-    email: "wario.warehouse@gmail.com",
-  },
-  {
-    supplierID: 2,
-    name: "Stan's Store",
-    phone: "1-800-555-2222",
-    email: "stan.store@hotmail.com",
-  },
-  {
-    supplierID: 3,
-    name: "Garry's Garden",
-    phone: "1-800-555-3333",
-    email: "garry.garden@yahoo.com",
-  },
-]);
+const suppliers = ref([]);
+
+async function loadSuppliers() {
+  try {
+    const res = await axios.get("/api/suppliers");
+    suppliers.value = res.data;
+  } catch (err) {
+    console.log("Error: ", err);
+  }
+}
+
+onMounted(() => {
+  loadSuppliers();
+});
 
 const isModalOpen = ref(false);
 const selected = ref("");
@@ -64,16 +59,24 @@ function cancelEdit() {
 }
 
 function saveEdit(id, update) {
-  const index = suppliers.value.findIndex(s => s.supplierID === id);
+  const index = suppliers.value.findIndex((s) => s.supplierID === id);
   if (index !== -1) {
     suppliers.value[index] = { ...suppliers.value[index], ...update };
   }
   cancelEdit();
 }
 
-function onRemove(id) {
-  console.log("Remove Supplier ID:", id);
-  alert("Deleting Supplier ID: " + id);
+async function onRemove(id) {
+  if (!confirm(`Are you sure you want to delete supplier ID: ${id}?`)) {
+    return;
+  }
+  try {
+    const res = await axios.delete(`/api/suppliers/${id}`);
+    suppliers.value = suppliers.value.filter((s) => s.supplierID !== id);
+  } catch (err) {
+    console.log("Error deleting ", err);
+    alert("You cannot delete a product that is referenced in a SaleDetails.");
+  }
 }
 </script>
 
@@ -102,11 +105,10 @@ function onRemove(id) {
       </thead>
       <tbody class="divide-y divide-(--grey)">
         <template v-for="s in suppliers" :key="s.supplierID">
-
           <template v-if="editingID === s.supplierID">
             <InlineEditableRow
               :value="s"
-              :onSave="update => saveEdit(s.supplierID, update)"
+              :onSave="(update) => saveEdit(s.supplierID, update)"
               :onCancel="cancelEdit"
             >
               <template #cols="{ row }">
