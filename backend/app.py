@@ -113,6 +113,13 @@ def update_ingredient(ingredient_id):
     mysql.connection.commit()
     return jsonify({"message": "Ingredient updated"})
 
+@app.route('/api/ingredients/<int:ingredient_id>', methods=['DELETE'])
+def delete_ingredient(ingredient_id):
+    cursor = mysql.connection.cursor()
+    cursor.callproc('DeleteIngredient', [ingredient_id])
+    mysql.connection.commit()
+    return jsonify({"message": "Ingredient deleted"})
+
 # ===========================================================================
 # SUPPLIERS ROUTES
 # ===========================================================================
@@ -163,14 +170,14 @@ def get_sales():
     sales = cursor.fetchall()
     return jsonify(sales)
 
-@app.route('/api/sales', methods=['POST'])
-def create_sale():
-    data = request.json
-    cursor = mysql.connection.cursor()
-    cursor.callproc('CreateSale', [data['saleDate']])
-    result = cursor.fetchone()
-    new_sale_id = result['newSaleID']
-    return jsonify({"message": "Sale created", "saleID": new_sale_id}), 201
+# @app.route('/api/sales', methods=['POST'])
+# def create_sale():
+#     data = request.json
+#     cursor = mysql.connection.cursor()
+#     cursor.callproc('CreateSale', [data['saleDate']])
+#     result = cursor.fetchone()
+#     new_sale_id = result['newSaleID']
+#     return jsonify({"message": "Sale created", "saleID": new_sale_id}), 201
 
 @app.route('/api/sales/<int:sale_id>', methods=['GET'])
 def get_sale(sale_id):

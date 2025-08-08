@@ -47,6 +47,11 @@ SET name = @nameInput,
     supplierID = @supplierIDInput 
 WHERE ingredientID = @ingredientIDInput;
 
+-- DELETE
+DELETE FROM Ingredients 
+WHERE ingredientID = @id 
+AND NOT EXISTS (SELECT 1 FROM Product_Ingredients WHERE ingredientID = @id);
+
 -- ===========================================================================
 -- CRUD OPERATIONS FOR PRODUCT_INGREDIENTS TABLE
 -- ===========================================================================
@@ -93,9 +98,9 @@ WHERE supplierID = @supplierIDInput;
 -- CRUD OPERATIONS FOR SALES TABLE
 -- ===========================================================================
 
--- CREATE (+ return new ID)
-INSERT INTO Sales (saleDate) VALUES (@saleDateInput);
-SELECT LAST_INSERT_ID() AS newSaleID;
+-- -- CREATE (+ return new ID)
+-- INSERT INTO Sales (saleDate) VALUES (@saleDateInput);
+-- SELECT LAST_INSERT_ID() AS newSaleID;
 
 -- READ
 SELECT * FROM Sales 

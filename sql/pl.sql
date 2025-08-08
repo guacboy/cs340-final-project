@@ -116,6 +116,15 @@ BEGIN
 END //
 DELIMITER ;
 
+-- Delete Ingredient
+DELIMITER //
+CREATE PROCEDURE DeleteIngredient(IN ingredient_id INT)
+BEGIN
+    DELETE FROM Ingredients 
+    WHERE ingredientID = ingredient_id;
+END //
+DELIMITER ;
+
 -- ===========================================================================
 -- CRUD FOR PRODUCT_INGREDIENTS TABLE
 -- ===========================================================================
