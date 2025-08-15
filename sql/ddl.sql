@@ -1,3 +1,5 @@
+-- Citation for the following function:
+-- Listed as EXAMPLE OPERATIONS FOR INTERSECTION TABLES.
 -- Date: 8/5/2025
 -- Prompts used to generate an example operation for intersection tables.
 -- Given the code: [ddl.sql file], write an example operation

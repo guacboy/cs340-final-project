@@ -1,8 +1,11 @@
 # Citation for the following function:
+# The entire file.
 # Date: 8/2/2025
 # Copied from /OR/ Adapted from /OR/ Based on:
 # Source URL: https://canvas.oregonstate.edu/courses/2007765/assignments/10118865
 
+# Citation for the following function:
+# The entire file excluding SERVE FRONTEND.
 # Date: 8/2/2025
 # Prompts used to generate API endpoints.
 # Given the code: [pl.sql file], write a template for all CRUD operations.

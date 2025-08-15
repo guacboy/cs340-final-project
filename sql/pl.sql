@@ -1,3 +1,5 @@
+-- Citation for the following function:
+-- The entire file excluding RESET FUNCTIONALITY.
 -- Date: 8/7/2025
 -- Prompts used to generate PL/SQL.
 -- Given the code: [ddl.sql file], write stored procedures for CRUD operations.
