@@ -42,9 +42,26 @@ const newIngredient = ref({
   supplierID: null,
 });
 
-function submitNewIngredient() {
+async function submitNewIngredient() {
   console.log("New Ingredient:", newIngredient.value);
+  
+  const newIngredientData = {
+    name: newIngredient.value.name,
+    unit: newIngredient.value.unit,
+    costPerUnit: newIngredient.value.costPerUnit,
+    stock: newIngredient.value.stock,
+    supplierID: newIngredient.value.supplierID
+  };
+  try {
+    const response = await axios.post("/api/ingredients", newIngredientData);
+  }
+  catch (err) {
+    console.error("Error adding ingredient:", err);
+    alert("Failed to add ingredient. Ensure the ingredient is unique.");
+    return;
+  }
   closeModal();
+  await loadIngredients();
 }
 
 function onAdd() {
@@ -73,11 +90,22 @@ function cancelEdit() {
   editingID.value = null;
 }
 
-function saveEdit(id, update) {
+async function saveEdit(id, update) {
   const index = ingredients.value.findIndex((i) => i.ingredientID === id);
-  if (index !== -1) {
-    ingredients.value[index] = { ...ingredients.value[index], ...update };
+  if (index === -1) {
+    return;
   }
+
+  ingredients.value[index] = { ...ingredients.value[index], ...update };
+  try {
+    console.log("Saving ingredient:", id, update);
+    await axios.put(`/api/ingredients/${id}`, ingredients.value[index]);
+
+  } catch (err) {
+    console.error("Error saving ingredient:", err);
+    alert("Failed to save ingredient. Please try again.");
+  }
+
   cancelEdit();
 }
 
@@ -85,6 +113,19 @@ async function onRemove(id) {
   if (!confirm(`Are you sure you want to delete ingredient ID: ${id}?`)) {
     return;
   }
+  try {
+    await axios.delete(`/api/ingredients/${id}`);
+    ingredients.value = ingredients.value.filter((i) => i.ingredientID !== id);
+  } catch (err) {
+    console.error("Error deleting ingredient:", err);
+    alert("Failed to delete ingredient. Please try again.");
+  }
+}
+
+function onSupplierSelected(row) {
+  const selected = suppliers.value.find((s) => s.supplierID === row.supplierID);
+  if (!selected) { return; }
+  row.name = selected.name;
 }
 </script>
 
@@ -118,7 +159,7 @@ async function onRemove(id) {
           <th class="px-4 py-2 text-left">Unit</th>
           <th class="px-4 py-2 text-left">Cost (per unit)</th>
           <th class="px-4 py-2 text-left">Stock</th>
-          <th class="px-4 py-2 text-left">Supplier ID</th>
+          <th class="px-4 py-2 text-center">Supplier</th>
           <th class="px-4 py-2 text-right">Actions</th>
         </tr>
       </thead>
@@ -165,13 +206,20 @@ async function onRemove(id) {
                   />
                 </td>
                 <td class="px-1">
-                  <input
+                  <select
                     v-model.number="row.supplierID"
-                    type="number"
-                    min="0"
-                    step="1"
-                    class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
-                  />
+                    @change="onSupplierSelected(i)"
+                    class="rounded border border-grey-600 bg-(--base) p-2 focus:outline-none focus:ring-1 focus:ring-(--grey)"
+                  >
+                    <option disabled value="">Select one</option>
+                    <option
+                      v-for="s in suppliers"
+                      :key="s.supplierID"
+                      :value="s.supplierID"
+                    >
+                      {{ s.name }}
+                    </option>
+                  </select>
                 </td>
               </template>
             </InlineEditableRow>
@@ -184,7 +232,7 @@ async function onRemove(id) {
               <td class="px-4 py-2">{{ i.unit }}</td>
               <td class="px-4 py-2">{{ i.costPerUnit }}</td>
               <td class="px-4 py-2 text-left">{{ i.stock }}</td>
-              <td class="px-4 py-2">{{ i.supplierID }}</td>
+              <td class="px-4 py-2">{{ suppliers.find((s) => s.supplierID == i.supplierID)?.name }}</td>
               <td class="px-4 py-2 text-right space-x-2">
                 <button
                   @click.stop="startEdit(i.ingredientID)"
