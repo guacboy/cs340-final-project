@@ -213,45 +213,45 @@ BEGIN
 -- for the intersection tables.
 -- AI Source URL: https://chat.deepseek.com
 
-    -- ===========================================================================
-    -- EXAMPLE OPERATIONS FOR INTERSECTION TABLES
-    -- ===========================================================================
-    -- 1. CREATE: Add new recipe (Watermelon needs lemons)
-    INSERT INTO Product_Ingredients (productID, ingredientID, unitQuantityRequired)
-    SELECT 
-        (SELECT productID FROM Products WHERE name = "Watermelon"),
-        (SELECT ingredientID FROM Ingredients WHERE name = "Lemons"),
-        3;
+    -- -- ===========================================================================
+    -- -- EXAMPLE OPERATIONS FOR INTERSECTION TABLES
+    -- -- ===========================================================================
+    -- -- 1. CREATE: Add new recipe (Watermelon needs lemons)
+    -- INSERT INTO Product_Ingredients (productID, ingredientID, unitQuantityRequired)
+    -- SELECT 
+    --     (SELECT productID FROM Products WHERE name = "Watermelon"),
+    --     (SELECT ingredientID FROM Ingredients WHERE name = "Lemons"),
+    --     3;
 
-    -- 2. UPDATE: Modify existing recipe (increase sugar in Strawberry)
-    UPDATE Product_Ingredients
-    SET unitQuantityRequired = 12
-    WHERE productID = (SELECT productID FROM Products WHERE name = "Strawberry")
-    AND ingredientID = (SELECT ingredientID FROM Ingredients WHERE name = "Sugar");
+    -- -- 2. UPDATE: Modify existing recipe (increase sugar in Strawberry)
+    -- UPDATE Product_Ingredients
+    -- SET unitQuantityRequired = 12
+    -- WHERE productID = (SELECT productID FROM Products WHERE name = "Strawberry")
+    -- AND ingredientID = (SELECT ingredientID FROM Ingredients WHERE name = "Sugar");
 
-    -- 3. DELETE: Remove unnecessary ingredient (water from Watermelon)
-    DELETE FROM Product_Ingredients
-    WHERE productID = (SELECT productID FROM Products WHERE name = "Watermelon")
-    AND ingredientID = (SELECT ingredientID FROM Ingredients WHERE name = "Water");
+    -- -- 3. DELETE: Remove unnecessary ingredient (water from Watermelon)
+    -- DELETE FROM Product_Ingredients
+    -- WHERE productID = (SELECT productID FROM Products WHERE name = "Watermelon")
+    -- AND ingredientID = (SELECT ingredientID FROM Ingredients WHERE name = "Water");
 
-    -- 4. CREATE: Add new sale detail (additional Watermelon in sale 3)
-    INSERT INTO Sale_Details (saleID, productID, quantity, salePrice)
-    SELECT 
-        (SELECT saleID FROM Sales WHERE saleDate = "2025-06-27 16:37:10"),
-        (SELECT productID FROM Products WHERE name = "Watermelon"),
-        1,
-        7.00;  -- Discounted price
+    -- -- 4. CREATE: Add new sale detail (additional Watermelon in sale 3)
+    -- INSERT INTO Sale_Details (saleID, productID, quantity, salePrice)
+    -- SELECT 
+    --     (SELECT saleID FROM Sales WHERE saleDate = "2025-06-27 16:37:10"),
+    --     (SELECT productID FROM Products WHERE name = "Watermelon"),
+    --     1,
+    --     7.00;  -- Discounted price
 
-    -- 5. UPDATE: Correct quantity in sale (sale 1 Classic from 4 to 3)
-    UPDATE Sale_Details
-    SET quantity = 3
-    WHERE saleID = (SELECT saleID FROM Sales WHERE saleDate = "2025-06-20 06:23:23")
-    AND productID = (SELECT productID FROM Products WHERE name = "Classic");
+    -- -- 5. UPDATE: Correct quantity in sale (sale 1 Classic from 4 to 3)
+    -- UPDATE Sale_Details
+    -- SET quantity = 3
+    -- WHERE saleID = (SELECT saleID FROM Sales WHERE saleDate = "2025-06-20 06:23:23")
+    -- AND productID = (SELECT productID FROM Products WHERE name = "Classic");
 
-    -- 6. DELETE: Remove a sale detail (sale 2 Strawberry)
-    DELETE FROM Sale_Details
-    WHERE saleID = (SELECT saleID FROM Sales WHERE saleDate = "2025-06-24 12:28:23")
-    AND productID = (SELECT productID FROM Products WHERE name = "Strawberry");
+    -- -- 6. DELETE: Remove a sale detail (sale 2 Strawberry)
+    -- DELETE FROM Sale_Details
+    -- WHERE saleID = (SELECT saleID FROM Sales WHERE saleDate = "2025-06-24 12:28:23")
+    -- AND productID = (SELECT productID FROM Products WHERE name = "Strawberry");
 
     SET FOREIGN_KEY_CHECKS = 1;
     COMMIT;
