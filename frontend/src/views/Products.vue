@@ -240,7 +240,10 @@ function onNewIngredientSelect(row) {
 <template>
   <BackButton />
   <div class="flex justify-between items-center mb-4">
+    <div class="flex items-start flex-col">
     <h2 class="text-2xl font-bold">Manage Products</h2>
+      <p class="text-sm text-(--grey)">Select a row to view product ingredients (M:M intersection)</p>
+    </div>
     <button
       @click="onAdd()"
       class="cursor-pointer px-2 py-2 bg-(--success-light) text-black rounded-sm hover:bg-(--success)"
@@ -258,8 +261,7 @@ function onNewIngredientSelect(row) {
           <th class="px-4 py-2 text-left">Price</th>
           <th class="px-4 py-2 text-right">Actions</th>
         </tr>
-      </thead>
-      <tbody class="divide-y divide-(--grey)">
+      </thead> <tbody class="divide-y divide-(--grey)">
         <template v-for="p in products" :key="p.productID">
           <template v-if="editingID === p.productID">
             <InlineEditableRow

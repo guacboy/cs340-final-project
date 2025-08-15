@@ -29,8 +29,17 @@ const newSupplier = ref({
   email: "",
 });
 
-function submitNewSupplier() {
+async function submitNewSupplier() {
   console.log("New Supplier:", newSupplier.value);
+  try {
+    await axios.post("/api/suppliers", newSupplier.value);
+    loadSuppliers();
+  } catch (err) {
+    console.log("Error adding supplier: ", err);
+    alert("Failed to add supplier.");
+    return;
+  }
+
   closeModal();
 }
 
@@ -58,10 +67,18 @@ function cancelEdit() {
   editingID.value = null;
 }
 
-function saveEdit(id, update) {
+async function saveEdit(id, update) {
   const index = suppliers.value.findIndex((s) => s.supplierID === id);
-  if (index !== -1) {
-    suppliers.value[index] = { ...suppliers.value[index], ...update };
+  if (index === -1) { return; }
+  suppliers.value[index] = { ...suppliers.value[index], ...update };
+  const supplier = suppliers.value[index];
+  console.log("Saving supplier: ", supplier);
+  try {
+    await axios.put(`/api/suppliers/${id}`, supplier);
+  } catch (err) {
+    console.log("Error updating supplier: ", err);
+    alert("Failed to update supplier.");
+    return;
   }
   cancelEdit();
 }

@@ -2,11 +2,18 @@
 import { ref, onMounted } from "vue";
 import InlineEditableRow from "../components/InlineEditableRow.vue";
 import BackButton from "../components/Button.vue";
-import { Pencil, X } from "lucide-vue-next";
+import { Pencil, X, Plus } from "lucide-vue-next";
 import axios from "axios";
 
 // Sample data
 const sales = ref([]);
+const products = ref([]);
+
+const newSale = ref({
+  date: "",
+  totalRevenue: 0,
+  saleDetails: [],
+});
 
 async function loadSales() {
   try {
@@ -32,9 +39,35 @@ async function loadSales() {
   }
 }
 
+async function loadProducts() {
+  try {
+    const res = await axios.get("/api/products");
+    products.value = res.data;
+    console.log("Products loaded: ", products.value);
+  } catch (err) {
+    console.log("Error: ", err);
+  }
+}
+
 onMounted(() => {
   loadSales();
+  loadProducts();
 });
+
+const isModalOpen = ref(false);
+
+function onAdd() {
+  isModalOpen.value = true;
+}
+
+function closeModal() {
+  isModalOpen.value = false;
+  newSale.value = {
+    date: "",
+    totalRevenue: 0,
+    saleDetails: [],
+  };
+}
 
 const expanded = ref(new Set());
 function toggleExpand(id) {
@@ -45,23 +78,16 @@ function toggleExpand(id) {
   }
 }
 
-// Edit Table Row
-const editingID = ref(null);
+async function submitNewSale() {
+  const newSale = {
+    date: "",
+    saleDetails: [],
+  };
+  const res = await axios.post("/api/sales", );
+  const saleID = res.data.saleID;
 
-function startEdit(id) {
-  editingID.value = id;
-}
-
-function cancelEdit() {
-  editingID.value = null;
-}
-
-function saveEdit(id, update) {
-  const index = sales.value.findIndex((s) => s.saleID === id);
-  if (index !== -1) {
-    sales.value[index] = { ...sales.value[index], ...update };
-  }
-  cancelEdit();
+  await loadProducts();
+  closeModal();
 }
 
 async function onRemove(id) {
@@ -79,8 +105,11 @@ async function onRemove(id) {
 
 <template>
   <BackButton />
-  <div class="flex justify-between items-center mb-4">
-    <h2 class="text-2xl font-bold">Manage Sales</h2>
+  <div class="flex justify-between items-start mb-4">
+    <div class="flex items-start flex-col">
+      <h2 class="text-2xl font-bold">Manage Sales</h2>
+      <p class="text-sm text-(--grey)">Select a row to view sale details</p>
+    </div>
   </div>
 
   <div class="overflow-auto bg-(--surface) border border-(--grey) rounded-md shadow-md">
@@ -95,46 +124,11 @@ async function onRemove(id) {
       </thead>
       <tbody class="divide-y divide-(--grey)">
         <template v-for="s in sales" :key="s.saleID">
-          <template v-if="editingID === s.saleID">
-            <InlineEditableRow
-              :value="s"
-              :onSave="(update) => saveEdit(s.saleID, update)"
-              :onCancel="cancelEdit"
-            >
-              <template #cols="{ row }">
-                <td class="px-4 py-2 text-left">{{ row.saleID }}</td>
-                <td class="px-1">
-                  <input
-                    v-model="row.saleDate"
-                    type="text"
-                    class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
-                  />
-                </td>
-                <td class="px-1">
-                  <input
-                    v-model.number="row.totalRevenue"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    class="w-full h-full border-box bg-(--base) border border-(--grey) p-1"
-                  />
-                </td>
-              </template>
-            </InlineEditableRow>
-          </template>
-
-          <template v-else>
             <tr @click="toggleExpand(s.saleID)" class="cursor-pointer hover:bg-(--base)">
               <td class="px-4 py-2 text-left">{{ s.saleID }}</td>
               <td class="px-4 py-2 text-left">{{ s.saleDate }}</td>
-              <td class="px-4 py-2 text-left">${{ s.totalRevenue }}</td>
+              <td class="px-4 py-2 text-center">${{ s.totalRevenue }}</td>
               <td class="px-4 py-2 text-right space-x-2">
-                <button
-                  @click.stop="startEdit(s.saleID)"
-                  class="cursor-pointer px-1 py-1 bg-(--secondary) text-black rounded-sm hover:bg-(--secondary-light) transition"
-                >
-                  <Pencil />
-                </button>
                 <button
                   @click.stop="onRemove(s.saleID)"
                   class="cursor-pointer px-1 py-1 bg-(--primary) text-black rounded-sm hover:bg-(--primary-light) transition"
@@ -164,9 +158,103 @@ async function onRemove(id) {
                 </table>
               </td>
             </tr>
-          </template>
         </template>
       </tbody>
     </table>
   </div>
+
+
+  <Transition name="fade">
+    <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-start justify-center pt-50">
+      <div class="fixed inset-0 bg-black opacity-60"></div>
+
+      <form
+        @submit.prevent="submitNewSale()"
+        class="relative opacity-100 bg-(--surface) text-(--white) p-4 rounded-md w-full max-w-lg shadow-lg"
+      >
+        <div class="absolute top-2 right-2">
+          <button
+            @click="closeModal"
+            type="button"
+            class="cursor-pointer text-(--grey) hover:text-(--primary) transition"
+          >
+            <X />
+          </button>
+        </div>
+        <h3 class="text-xl font-semibold mb-6">Add New Sale</h3>
+
+        <label class="block mb-4">
+          Date:
+          <input
+            v-model="newSale.date"
+            type="text"
+            required
+            class="mt-1 w-full rounded border border-grey-600 bg-(--base) p-2 focus:outline-none focus:ring-1 focus:ring-(--grey)"
+          />
+        </label>
+
+        <label class="block mb-2">
+          Details:
+          <div
+            v-for="(detail, index) in newSale.saleDetails"
+            :key="index"
+            class="flex items-center gap-2 mt-1"
+          >
+            <select
+              v-model.number="saleDetails.productID"
+              class="w-1/2 rounded border border-grey-600 bg-(--base) p-2 focus:outline-none focus:ring-1 focus:ring-(--grey)"
+            >
+              <option disabled value="">Select one</option>
+              <option
+                v-for="p in products"
+                :key="p.productID"
+                :value="p.productID"
+              >
+                {{ p.name }}
+              </option>
+            </select>
+            <input
+              v-model.number="p.price"
+              type="number"
+              placeholder="Sale Price"
+              class="w-1/2 rounded border border-grey-600 bg-(--base) p-2 focus:outline-none focus:ring-1 focus:ring-(--grey)"
+            />
+            <button
+              type="button"
+              @click="newSaleRemoveDetail(index)"
+              class="cursor-pointer text-(--primary) hover:text-(--primary-light)"
+            >
+              <X />
+            </button>
+          </div>
+        </label>
+
+        <div class="w-full flex justify-end mb-6">
+          <button
+            type="button"
+            @click="newSaleDetail"
+            class="cursor-pointer flex hover:bg-(--base) rounded-sm transition"
+          >
+            <Plus /> Add Product
+          </button>
+        </div>
+
+        <div class="flex justify-center space-x-4">
+          <button
+            type="button"
+            @click="closeModal"
+            class="px-2 py-2 bg-gray-700 rounded-sm hover:bg-(--primary) transition"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="px-2 py-2 bg-gray-700 rounded hover:bg-(--success) transition"
+          >
+            Save
+          </button>
+        </div>
+      </form>
+    </div>
+  </Transition>
 </template>
