@@ -229,11 +229,16 @@ function editProductAddIngredient() {
   });
 }
 
-function onNewIngredientSelect(row) {
-  const selected = ingredients.value.find((i) => i.ingredientID === row.ingredientID);
+function onNewIngredientSelect(idx, value) {
+  const selected = ingredients.value.find((i) => i.ingredientID == value);
   if (!selected) { return; }
-  row.name = selected.name;
-  row.unit = selected.unit;
+  const update = {
+    ...(editingRow.value.ingredients[idx] || {}),
+    name: selected.name,
+    unit: selected.unit
+  }
+  editingRow.value.ingredients.splice(idx, 1, update)
+  console.log("row", editingRow.value, "selected", selected)
 }
 </script>
 
@@ -326,14 +331,14 @@ function onNewIngredientSelect(row) {
                 <tbody class="text-sm text-(--grey)">
 
                   <template v-if="editingID === p.productID">
-                    <template v-for="i in (editingRow && editingRow.ingredients) || []" :key="i.ingredientID">
+                    <template v-for="(i, idx) in (editingRow && editingRow.ingredients) || []" :key="i.ingredientID">
                       <InlineEditableDropdownRow v-if="i.ingredientID !== ''"
                         :value="i"
                         :onChange="(update) => updateIngredient(i.ingredientID, update)"
                         :onRemove="() => removeIngredient(i.ingredientID)"
                       >
                         <template #cols="{ row }">
-                          <td class="py-1">{{ i.name }}</td>
+                          <td class="py-1">{{ row.name }}</td>
                           <td class="px-1">
                             <input v-model.number="row.unitQuantityRequired" 
                               type="number" min="0" step="1" S
@@ -350,7 +355,7 @@ function onNewIngredientSelect(row) {
                           <td>
                             <select
                               v-model.number="i.ingredientID"
-                              @change="onNewIngredientSelect(i)"
+                              @change="(e) => onNewIngredientSelect(idx, e.target.value)"
                               class="rounded border border-grey-600 bg-(--base) p-2 focus:outline-none focus:ring-1 focus:ring-(--grey)"
                             >
                               <option disabled value="">Select one</option>
