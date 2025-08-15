@@ -34,7 +34,6 @@ def get_products():
 @app.route('/api/products', methods=['POST'])
 def create_product():
     data = request.json
-    print(data)
     cursor = mysql.connection.cursor()
     cursor.execute('CALL CreateProduct(%s, %s)', (data['name'], data['price']))
     result = cursor.fetchone()
@@ -214,20 +213,51 @@ def get_product_ingredients(product_id):
 @app.route('/api/products/<int:product_id>/ingredients', methods=['POST'])
 def create_recipe(product_id):
     data = request.json
-    print(data)
     cursor = mysql.connection.cursor()
     for ingredient in data.get('ingredients', []):
         cursor.callproc('CreateRecipe', [product_id, ingredient['ingredientID'], ingredient['unitQuantityRequired']])
     mysql.connection.commit()
     return jsonify({"message": "Ingredients added to product"}), 201
 
+
 @app.route('/api/products/<int:product_id>/ingredients/<int:ingredient_id>', methods=['PUT'])
-def update_recipe(product_id, ingredient_id):
+def update_recipe_ingredient(product_id, ingredient_id):
     data = request.json
     cursor = mysql.connection.cursor()
     cursor.callproc('UpdateRecipe', [product_id, ingredient_id, data['unitQuantityRequired']])
     mysql.connection.commit()
     return jsonify({"message": "Recipe updated"})
+
+@app.route('/api/products/<int:product_id>/ingredients', methods=['PUT'])
+def update_recipe(product_id):
+    data = request.get_json(silent=True) or {}
+    ingredients = data.get('ingredients', [])
+
+    if not ingredients:
+        return jsonify({"message": "No ingredients provided"}), 400
+
+    print(f"Updating recipe for product {product_id} with ingredients: {ingredients}")
+    cursor = None
+    try:
+        cursor = mysql.connection.cursor()
+        cursor.execute("SELECT ingredientID from Product_Ingredients where productID = %s", (product_id,))
+        existing_ids = {row['ingredientID'] for row in cursor.fetchall()}
+        for i in ingredients:
+            if i['ingredientID'] in existing_ids:
+                cursor.callproc('UpdateRecipe', [product_id, i['ingredientID'], i['unitQuantityRequired']])
+            else:
+                cursor.callproc('CreateRecipe', [product_id, i['ingredientID'], i['unitQuantityRequired']])
+        mysql.connection.commit()
+        return jsonify({"message": "Recipe Updated"}), 200
+
+    except Exception as e:
+        mysql.connection.rollback()
+        print(f"Error updating recipe: {e}")
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
 
 @app.route('/api/products/<int:product_id>/ingredients/<int:ingredient_id>', methods=['DELETE'])
 def delete_recipe(product_id, ingredient_id):

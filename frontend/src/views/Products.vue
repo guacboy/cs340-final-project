@@ -2,9 +2,14 @@
 import { ref, onMounted } from "vue";
 import BackButton from "../components/Button.vue";
 import InlineEditableRow from "../components/InlineEditableRow.vue";
-import { Pencil, X, Plus } from "lucide-vue-next";
+import InlineEditableDropdownRow from "../components/InlineEditableDropdownRow.vue";
+import { Pencil, X, Plus, Trash } from "lucide-vue-next";
 import axios from "axios";
 import ResetDBButton from "../components/ResetDBButton.vue";
+
+function deepCopy(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
 
 // Sample data
 const ingredients = ref([]);
@@ -118,21 +123,117 @@ async function onRemove(id) {
 
 // Edit Table Row
 const editingID = ref(null);
+const editingRow = ref(null);
 
 function startEdit(id) {
   editingID.value = id;
+  expanded.value.add(id);
+  let p = products.value.find((p) => p.productID === id);
+  if (!p) { return; }
+  editingRow.value = deepCopy(p);
+
 }
 
 function cancelEdit() {
   editingID.value = null;
+  editingRow.value = null;
 }
 
 function saveEdit(id, update) {
+  if (!editingRow.value) { return; }
   const index = products.value.findIndex((p) => p.productID === id);
-  if (index !== -1) {
-    products.value[index] = { ...products.value[index], ...update };
+  if (index === -1) { return; }
+
+  editingRow.value = {
+    ...editingRow.value,
+    name: update.name || editingRow.value.name,
+    price: update.price || editingRow.value.price,
+  };
+
+  // validate fields
+  if (!editingRow.value.name || editingRow.value.price < 0) {A
+    alert("Please fill in all required fields.");
+    return;
   }
+  if (editingRow.value.ingredients.length === 0) {
+    alert("Please add at least one ingredient.");
+    return;
+  }
+  if (editingRow.value.ingredients.some(i => !i.ingredientID || i.unitQuantityRequired <= 0)) {
+    alert("Please ensure all ingredients have a valid name and quantity.");
+    return;
+  }
+
+
+  try {
+    console.log("Updating product: ", editingRow.value);
+
+    axios.put(`/api/products/${id}`, {
+      name: editingRow.value.name,
+      price: editingRow.value.price,
+    });
+
+    let ingredientsToUpdate = editingRow.value.ingredients.map(i => ({
+      ingredientID: i.ingredientID,
+      unitQuantityRequired: i.unitQuantityRequired,
+    }));
+
+    axios.put(`/api/products/${id}/ingredients`, {
+      ingredients: ingredientsToUpdate,
+    });
+
+  } catch (err) {
+    console.log("Error updating product: ", err);
+    alert("Failed to update product. Please try again.");
+  }
+
+  products.value[index] = { 
+    ...products.value[index],
+    ...editingRow.value,
+    ingredients: [...editingRow.value.ingredients],
+  };
+
   cancelEdit();
+}
+
+function updateProduct(id, update) {
+  console.log("Updating product: ", id, update);
+  if (!editingRow.value) { return; }
+  if (editingID.value !== id) { return; }
+  //editingRow.value = { ...editingRow.value, name: update.name, price: update.price };
+}
+
+function updateIngredient(id, update) {
+  console.log("Updating ingredient: ", id, update);
+  if (!editingRow.value) { return; }
+  const index = editingRow.value.ingredients.findIndex((i) => i.ingredientID === id);
+  if (index !== -1) {
+    editingRow.value.ingredients[index] = { ...editingRow.value.ingredients[index], ...deepCopy(update) };
+  }
+}
+
+function removeIngredient(id) {
+  if (!editingRow.value) { return; }
+  const index = editingRow.value.ingredients.findIndex((i) => i.ingredientID === id);
+  if (index !== -1) {
+    editingRow.value.ingredients.splice(index, 1);
+  }
+}
+
+function editProductAddIngredient() {
+  if (!editingRow.value) { return; }
+  editingRow.value.ingredients.push({
+    ingredientID: "",
+    name: "",
+    unitQuantityRequired: 0,
+  });
+}
+
+function onNewIngredientSelect(row) {
+  const selected = ingredients.value.find((i) => i.ingredientID === row.ingredientID);
+  if (!selected) { return; }
+  row.name = selected.name;
+  row.unit = selected.unit;
 }
 </script>
 
@@ -162,7 +263,7 @@ function saveEdit(id, update) {
         <template v-for="p in products" :key="p.productID">
           <template v-if="editingID === p.productID">
             <InlineEditableRow
-              :value="p"
+              :value="editingRow"
               :onSave="(update) => saveEdit(p.productID, update)"
               :onCancel="cancelEdit"
             >
@@ -221,11 +322,85 @@ function saveEdit(id, update) {
                   </tr>
                 </thead>
                 <tbody class="text-sm text-(--grey)">
-                  <tr v-for="i in p.ingredients" :key="i.ingredientID">
-                    <td class="py-1">{{ i.name }}</td>
-                    <td class="py-1">{{ i.unitQuantityRequired }}</td>
-                    <td class="py-1">{{ i.unit }}</td>
-                  </tr>
+
+                  <template v-if="editingID === p.productID">
+                    <template v-for="i in (editingRow && editingRow.ingredients) || []" :key="i.ingredientID">
+                      <InlineEditableDropdownRow v-if="i.ingredientID !== ''"
+                        :value="i"
+                        :onChange="(update) => updateIngredient(i.ingredientID, update)"
+                        :onRemove="() => removeIngredient(i.ingredientID)"
+                      >
+                        <template #cols="{ row }">
+                          <td class="py-1">{{ i.name }}</td>
+                          <td class="px-1">
+                            <input v-model.number="row.unitQuantityRequired" 
+                              type="number" min="0" step="1" S
+                              @input="row.unitQuantityRequired = Math.floor(row.unitQuantityRequired)"
+                              class="h-full border-box bg-(--base) border border-(--grey) p-1"
+                            />
+                          </td>
+                          <td class="px-1 text-left">{{ i.unit }}</td>
+                        </template>
+                      </InlineEditableDropdownRow>
+
+                      <template v-else>
+                        <tr>
+                          <td>
+                            <select
+                              v-model.number="i.ingredientID"
+                              @change="onNewIngredientSelect(i)"
+                              class="rounded border border-grey-600 bg-(--base) p-2 focus:outline-none focus:ring-1 focus:ring-(--grey)"
+                            >
+                              <option disabled value="">Select one</option>
+                              <option
+                                v-for="ingr in ingredients.filter(ingr => !editingRow.ingredients.some(eri => eri.ingredientID === ingr.ingredientID))"
+                                :key="ingr.ingredientID"
+                                :value="ingr.ingredientID"
+                              >
+                                {{ ingr.name }}
+                              </option>
+                            </select>
+                          </td>
+                          <td>
+                            <input
+                              v-model.number="i.unitQuantityRequired"
+                              type="number" min="0" step="1"
+                              @input="i.unitQuantityRequired = Math.floor(i.unitQuantityRequired)"
+                              placeholder="Qty"
+                              class="rounded border border-grey-600 bg-(--base) p-2 focus:outline-none focus:ring-1 focus:ring-(--grey)"
+                            />
+                          </td>
+                          <td></td>
+                          <td>
+                            <button @click="" class="cursor-pointer px-1 py-1 bg-(--primary) text-black rounded-sm hover:bg-(--success-light) transition">
+                              <Trash />
+                            </button>
+                          </td>
+                        </tr>
+                      </template>
+                    </template>
+                    <tr>
+                      <td colspan="4">
+                        <div class="w-full flex justify-center my-1">
+                          <button
+                            type="button"
+                            @click="editProductAddIngredient"
+                            class="cursor-pointer flex hover:bg-(--base) rounded-sm transition text-(--success)"
+                          >
+                            <Plus /> Add Ingredient
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  </template>
+
+                  <template v-else>
+                    <tr v-for="i in p.ingredients" :key="i.ingredientID">
+                      <td class="py-1">{{ i.name }}</td>
+                      <td class="py-1">{{ i.unitQuantityRequired }}</td>
+                      <td class="py-1 text">{{ i.unit }}</td>
+                    </tr>
+                  </template>
                 </tbody>
               </table>
             </td>
