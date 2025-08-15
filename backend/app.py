@@ -3,6 +3,11 @@
 # Copied from /OR/ Adapted from /OR/ Based on:
 # Source URL: https://canvas.oregonstate.edu/courses/2007765/assignments/10118865
 
+# Date: 8/2/2025
+# Prompts used to generate API endpoints.
+# Given the code: [pl.sql file], write a template for all CRUD operations.
+# AI Source URL: https://chat.deepseek.com
+
 from flask import Flask, jsonify, request, send_from_directory
 from flask_mysqldb import MySQL
 from dotenv import load_dotenv
@@ -24,11 +29,6 @@ mysql = MySQL(app)
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 FRONTEND_DIST = os.path.join(BASE_DIR, '../frontend/dist')
-
-# Date: 8/2/2025
-# Prompts used to generate API endpoints.
-# Given the code: [pl.sql file], write a template for all CRUD operations.
-# AI Source URL: https://chat.deepseek.com
 
 # ===========================================================================
 # PRODUCTS ROUTES

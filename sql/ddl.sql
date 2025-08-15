@@ -1,3 +1,9 @@
+-- Date: 8/5/2025
+-- Prompts used to generate an example operation for intersection tables.
+-- Given the code: [ddl.sql file], write an example operation
+-- for the intersection tables.
+-- AI Source URL: https://chat.deepseek.com
+
 DROP PROCEDURE IF EXISTS sp_load_lemonade_db;
 DELIMITER //
 
@@ -206,12 +212,6 @@ BEGIN
         (SELECT productID FROM Products WHERE name = "Watermelon"),
         2,
         7.25;
-
--- Date: 8/5/2025
--- Prompts used to generate an example operation for intersection tables.
--- Given the code: [ddl.sql file], write an example operation
--- for the intersection tables.
--- AI Source URL: https://chat.deepseek.com
 
     -- -- ===========================================================================
     -- -- EXAMPLE OPERATIONS FOR INTERSECTION TABLES
