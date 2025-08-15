@@ -1,3 +1,8 @@
+-- Date: 8/7/2025
+-- Prompts used to generate PL/SQL.
+-- Given the code: [ddl.sql file], write stored procedures for CRUD operations.
+-- AI Source URL: https://chat.deepseek.com
+
 -- ===========================================================================
 -- CRUD FOR PRODUCTS TABLE
 -- ===========================================================================
@@ -246,15 +251,15 @@ DELIMITER ;
 -- CRUD FOR SALES TABLE
 -- ===========================================================================
 
--- Create Sale
-DROP PROCEDURE IF EXISTS CreateSale;
-DELIMITER //
-CREATE PROCEDURE CreateSale(IN p_saleDate TIMESTAMP)
-BEGIN
-    INSERT INTO Sales (saleDate) VALUES (p_saleDate);
-    SELECT LAST_INSERT_ID() AS newSaleID;
-END //
-DELIMITER ;
+-- -- Create Sale
+-- DROP PROCEDURE IF EXISTS CreateSale;
+-- DELIMITER //
+-- CREATE PROCEDURE CreateSale(IN p_saleDate TIMESTAMP)
+-- BEGIN
+--     INSERT INTO Sales (saleDate) VALUES (p_saleDate);
+--     SELECT LAST_INSERT_ID() AS newSaleID;
+-- END //
+-- DELIMITER ;
 
 -- Read Sale
 DROP PROCEDURE IF EXISTS GetSale;
@@ -268,19 +273,19 @@ BEGIN
 END //
 DELIMITER ;
 
--- Update Sale Date
-DROP PROCEDURE IF EXISTS UpdateSaleDate;
-DELIMITER //
-CREATE PROCEDURE UpdateSaleDate(
-    IN p_saleID INT,
-    IN p_saleDate TIMESTAMP
-)
-BEGIN
-    UPDATE Sales
-    SET saleDate = p_saleDate
-    WHERE saleID = p_saleID;
-END //
-DELIMITER ;
+-- -- Update Sale Date
+-- DROP PROCEDURE IF EXISTS UpdateSaleDate;
+-- DELIMITER //
+-- CREATE PROCEDURE UpdateSaleDate(
+--     IN p_saleID INT,
+--     IN p_saleDate TIMESTAMP
+-- )
+-- BEGIN
+--     UPDATE Sales
+--     SET saleDate = p_saleDate
+--     WHERE saleID = p_saleID;
+-- END //
+-- DELIMITER ;
 
 -- Delete Sale
 DROP PROCEDURE IF EXISTS DeleteSale;

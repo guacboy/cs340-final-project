@@ -106,10 +106,10 @@ WHERE supplierID = @supplierIDInput;
 SELECT * FROM Sales 
 WHERE saleID = @saleIDInput;
 
--- UPDATE
-UPDATE Sales 
-SET saleDate = @saleDateInput 
-WHERE saleID = @saleIDInput;
+-- -- UPDATE
+-- UPDATE Sales 
+-- SET saleDate = @saleDateInput 
+-- WHERE saleID = @saleIDInput;
 
 -- DELETE
 DELETE FROM Sales 
